@@ -4,5 +4,5 @@ __pycache__/
 data/
 demo-data/
 # La configuración de cada servidor, fuera del repo para que git pull no choque.
-docker-compose.override.yaml
+.env
 .venv/

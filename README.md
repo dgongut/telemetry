@@ -83,27 +83,19 @@ Aun así, conviene usar dos nombres de dominio que apunten al mismo contenedor:
 
 ### Con Pangolin en el mismo VPS
 
-1. Crea los dos registros A en el DNS apuntando al VPS.
-2. Junto al `docker-compose.yaml`, crea un `docker-compose.override.yaml` con esto. Compose lo lee solo, y como git lo ignora, un `git pull` futuro no choca con él:
-   ```yaml
-   services:
-       telemetry:
-           ports: !reset []   # sin puertos: solo se llega a través de Pangolin
-           networks:
-               - pangolin
+Pangolin corre dentro de un contenedor, así que no alcanza un puerto publicado en `127.0.0.1`. Se publica en cambio en `172.17.0.1`, la IP del VPS en la red bridge de Docker: los contenedores llegan a ella, pero desde internet no existe.
 
-   networks:
-       pangolin:
-           external: true
-   ```
-   Si la red de Pangolin no se llama `pangolin`, cámbiale el nombre; `docker network ls` te dice cuál es.
-3. Arráncalo:
+No lo publiques en todas las interfaces (`8000:8000`): Docker se salta las reglas de UFW y el puerto quedaría abierto al mundo.
+
+1. Crea los dos registros A en el DNS apuntando al VPS.
+2. Junto al `docker-compose.yaml`, crea el `.env` (git lo ignora) y arranca:
    ```bash
+   echo "TELEMETRY_BIND=172.17.0.1" > .env
    docker compose up -d --build
    ```
-4. En Pangolin, crea dos recursos HTTP en el site local (el del propio servidor), uno para `telemetry.dgongut.com` y otro para `stats.dgongut.com`. Los dos con destino `http://telemetry:8000`.
-5. **Quita la autenticación de los dos recursos.** Los bots no pueden iniciar sesión, y la web es pública. Si se queda protegida, los envíos reciben la página de login y no se guarda nada.
-6. Comprueba que `https://telemetry.dgongut.com/healthz` responde `{"ok":true,...}`.
+3. En Pangolin, crea dos recursos HTTP en el site local, uno para `telemetry.dgongut.com` y otro para `stats.dgongut.com`. Los dos con destino `172.17.0.1`, puerto `8000`.
+4. **Quita la autenticación de los dos recursos.** Los bots no pueden iniciar sesión, y la web es pública. Si se queda protegida, los envíos reciben la página de login y no se guarda nada.
+5. Comprueba que `https://telemetry.dgongut.com/healthz` responde `{"ok":true,...}`.
 
 ### Sin Pangolin
 

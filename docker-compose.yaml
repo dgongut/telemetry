@@ -6,7 +6,7 @@ services:
         volumes:
             - ./data:/app/data            # la base de datos: haz copia de seguridad de esta carpeta
             - ./projects:/app/projects:ro # los manifiestos, para añadir proyectos sin reconstruir
-        # Solo accesible desde el propio equipo. Para Pangolin, no toques este
-        # fichero: crea un docker-compose.override.yaml como dice el README.
+        # En qué IP del equipo escucha. Por defecto solo el propio equipo; con
+        # Pangolin, TELEMETRY_BIND=172.17.0.1 en un .env: ver el README.
         ports:
-            - 127.0.0.1:8000:8000
+            - ${TELEMETRY_BIND:-127.0.0.1}:8000:8000
