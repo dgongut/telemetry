@@ -6,7 +6,7 @@ services:
         volumes:
             - ./data:/app/data            # la base de datos: haz copia de seguridad de esta carpeta
             - ./projects:/app/projects:ro # los manifiestos, para añadir proyectos sin reconstruir
-        # En qué IP del equipo escucha. Por defecto solo el propio equipo; con
-        # Pangolin, TELEMETRY_BIND=172.17.0.1 en un .env: ver el README.
+        # En qué IP del equipo escucha: solo el propio equipo, salvo que un .env
+        # diga otra cosa con TELEMETRY_BIND. Ver el README.
         ports:
             - ${TELEMETRY_BIND:-127.0.0.1}:8000:8000

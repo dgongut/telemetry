@@ -81,25 +81,18 @@ Aun así, conviene usar dos nombres de dominio que apunten al mismo contenedor:
 - `telemetry.dgongut.com` → los envíos. Queda escrito en el código de cada versión publicada, así que no debe cambiar nunca.
 - `stats.dgongut.com` → la web. Si algún día la mueves a otro sitio, los bots antiguos siguen enviando a `telemetry` sin enterarse.
 
-### Con Pangolin en el mismo VPS
+### Puesta en marcha
 
-Pangolin corre dentro de un contenedor, así que no alcanza un puerto publicado en `127.0.0.1`. Se publica en cambio en `172.17.0.1`, la IP del VPS en la red bridge de Docker: los contenedores llegan a ella, pero desde internet no existe.
-
-No lo publiques en todas las interfaces (`8000:8000`): Docker se salta las reglas de UFW y el puerto quedaría abierto al mundo.
-
-1. Crea los dos registros A en el DNS apuntando al VPS.
-2. Junto al `docker-compose.yaml`, crea el `.env` (git lo ignora) y arranca:
+1. Apunta los dos dominios al servidor con registros A.
+2. Elige en qué IP escucha el contenedor con un `.env` junto al `docker-compose.yaml` (git lo ignora):
+   - **Sin `.env`:** solo en `127.0.0.1`. Vale si el proxy está instalado en el propio servidor, fuera de Docker.
+   - **`TELEMETRY_BIND=0.0.0.0`:** en todas las interfaces. Es lo necesario si el proxy corre en Docker y apunta a la IP pública. Cierra el puerto 8000 en el firewall de tu proveedor: Docker se salta las reglas de UFW.
+3. Arranca el contenedor:
    ```bash
-   echo "TELEMETRY_BIND=172.17.0.1" > .env
    docker compose up -d --build
    ```
-3. En Pangolin, crea dos recursos HTTP en el site local, uno para `telemetry.dgongut.com` y otro para `stats.dgongut.com`. Los dos con destino `172.17.0.1`, puerto `8000`.
-4. **Quita la autenticación de los dos recursos.** Los bots no pueden iniciar sesión, y la web es pública. Si se queda protegida, los envíos reciben la página de login y no se guarda nada.
+4. En el proxy, envía los dos dominios al puerto `8000` por HTTP y **sin autenticación**: los bots no pueden iniciar sesión, y la web es pública.
 5. Comprueba que `https://telemetry.dgongut.com/healthz` responde `{"ok":true,...}`.
-
-### Sin Pangolin
-
-Deja el `docker-compose.yaml` tal cual: el contenedor escucha en `127.0.0.1:8000` y tu proxy inverso apunta los dos dominios ahí.
 
 ### Copias de seguridad
 
