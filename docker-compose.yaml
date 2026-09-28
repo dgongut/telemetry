@@ -1,0 +1,12 @@
+services:
+    telemetry:
+        container_name: telemetry
+        build: .
+        restart: unless-stopped
+        volumes:
+            - ./data:/app/data            # la base de datos: haz copia de seguridad de esta carpeta
+            - ./projects:/app/projects:ro # los manifiestos, para añadir proyectos sin reconstruir
+        # Solo accesible desde el propio equipo. Para Pangolin, no toques este
+        # fichero: crea un docker-compose.override.yaml como dice el README.
+        ports:
+            - 127.0.0.1:8000:8000

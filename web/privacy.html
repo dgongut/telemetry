@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>dgongut · stats</title>
+	<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+	<div class="wrap">
+		<header class="top" id="top"></header>
+		<div class="title-row">
+			<div>
+				<h1 id="title"></h1>
+				<p class="lead" id="lead"></p>
+				<p class="meta" id="links"></p>
+			</div>
+		</div>
+		<div id="content"></div>
+	</div>
+	<script src="/static/common.js"></script>
+	<script>
+	"use strict";
+
+	const PROJECT = projectFromPath();
+
+	function text(value) {
+		if (value && typeof value === "object") return value[LANG] || value.en || Object.values(value)[0] || "";
+		return value || "";
+	}
+
+	function field(key, kind, description) {
+		return `<div class="field"><div class="key"><code>${escapeHtml(key)}</code><small>${escapeHtml(kind)}</small></div>
+			<p>${escapeHtml(description)}</p></div>`;
+	}
+
+	function kindOf(metric) {
+		if (metric.type === "enum") return t("type_enum", { v: metric.values.join(", ") });
+		return t(`type_${metric.type}`);
+	}
+
+	api(`/v1/projects/${encodeURIComponent(PROJECT)}/manifest`).then((manifest) => {
+		document.title = `${manifest.name} · ${t("privacy_title")}`;
+		document.getElementById("title").textContent = `${manifest.name} · ${t("privacy_title")}`;
+		document.getElementById("lead").textContent = t("privacy_lead", { name: manifest.name });
+		document.getElementById("links").innerHTML =
+			`<a href="/${encodeURIComponent(manifest.id)}">${escapeHtml(t("stats"))}</a>` +
+			(manifest.repo ? ` · <a href="${escapeHtml(manifest.repo)}" rel="noopener">${escapeHtml(t("source"))}</a>` : "");
+
+		const common = [
+			field("install_id", "UUID", t("install_id_desc")),
+			field("version", t("type_text"), t("version_desc")),
+			field("arch", t("type_text"), t("arch_desc")),
+		];
+		const metrics = manifest.metrics.map((m) => field(`metrics.${m.key}`, kindOf(m), text(m.description)));
+		const groups = manifest.usage.groups.map((g) =>
+			field(`usage.${g.prefix}*`, text(g.label), text(g.description) || text(manifest.usage.description)));
+		const optOut = text(manifest.opt_out);
+
+		document.getElementById("content").innerHTML = `
+			<section class="card"><h2>${escapeHtml(t("common_fields"))}</h2><div class="fields">${common.join("")}</div></section>
+			<section class="card"><h2>${escapeHtml(t("metrics_title"))}</h2><div class="fields">${metrics.join("")}</div></section>
+			<section class="card"><h2>${escapeHtml(t("usage_title"))}</h2><p class="sub">${escapeHtml(text(manifest.usage.description))}</p>
+				<div class="fields">${groups.join("")}</div></section>
+			<section class="card"><h2>${escapeHtml(t("never_title"))}</h2>
+				<div class="never"><ul>${t("never_items").map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+				<p class="sub" style="margin:12px 0 0">${escapeHtml(t("how_often", { h: manifest.interval_hours, d: RETENTION_DAYS }))}</p></section>
+			<section class="card"><h2>${escapeHtml(t("opt_out"))}</h2><p class="lead">${escapeHtml(optOut)}</p></section>`;
+	}).catch(() => showError("content"));
+	</script>
+</body>
+</html>

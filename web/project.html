@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>dgongut · stats</title>
+	<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+	<div class="wrap">
+		<header class="top" id="top"></header>
+		<div class="title-row">
+			<div>
+				<h1 id="name"></h1>
+				<p class="lead" id="description"></p>
+				<p class="meta" id="links"></p>
+			</div>
+			<div class="segmented" role="group" id="ranges">
+				<button type="button" data-days="7">7 d</button>
+				<button type="button" data-days="30">30 d</button>
+				<button type="button" data-days="90">90 d</button>
+			</div>
+		</div>
+		<div id="dashboard"></div>
+		<footer id="footer"></footer>
+	</div>
+	<script src="/static/vendor/chart.umd.js"></script>
+	<script src="/static/common.js"></script>
+	<script src="/static/project.js"></script>
+</body>
+</html>

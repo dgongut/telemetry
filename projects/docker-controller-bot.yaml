@@ -1,0 +1,223 @@
+# Docker Controller Bot
+#
+# Everything the bot may send. The server drops any metric not declared here,
+# and the privacy page lists every one of them with its description.
+
+name: Docker Controller Bot
+description:
+  es: Bot de Telegram para gestionar contenedores Docker en uno o varios hosts.
+  en: Telegram bot to manage Docker containers on one or more hosts.
+repo: https://github.com/dgongut/docker-controller-bot
+opt_out:
+  es: Desde /settings → Estadísticas anónimas. Solo se envían si la configuración está en un volumen.
+  en: From /settings → Anonymous statistics. They are only sent when the configuration is on a volume.
+enabled: true
+interval_hours: 24
+
+metrics:
+  hosts:
+    type: int
+    min: 0
+    max: 1000
+    kpi: sum
+    kpi_label: { es: Hosts gestionados, en: Hosts managed }
+    chart: histogram
+    buckets: ["1", "2", "3", "4-5", "6+"]
+    label: { es: Hosts por instalación, en: Hosts per installation }
+    description:
+      es: Cuántos hosts de Docker hay configurados, contando los pausados. Solo el número, nunca su nombre ni su dirección.
+      en: How many Docker hosts are configured, paused ones included. Only the number, never their name or address.
+  hosts_paused:
+    type: int
+    min: 0
+    max: 1000
+    chart: nonzero
+    label: { es: Con algún host pausado, en: With a paused host }
+    description:
+      es: Cuántos de esos hosts están pausados.
+      en: How many of those hosts are paused.
+  hosts_ssh:
+    type: int
+    min: 0
+    max: 1000
+    chart: nonzero
+    label: { es: Con hosts por SSH, en: With SSH hosts }
+    description:
+      es: Cuántos hosts se conectan por ssh://.
+      en: How many hosts connect over ssh://.
+  hosts_tcp:
+    type: int
+    min: 0
+    max: 1000
+    chart: nonzero
+    label: { es: Con hosts por TCP, en: With TCP hosts }
+    description:
+      es: Cuántos hosts se conectan por tcp://.
+      en: How many hosts connect over tcp://.
+  containers:
+    type: enum
+    values: ["0", "1-5", "6-10", "11-25", "26-50", "51-100", "101+"]
+    chart: bar
+    label: { es: Contenedores por instalación, en: Containers per installation }
+    description:
+      es: Cuántos contenedores hay entre todos los hosts, por tramos. Nunca sus nombres ni sus imágenes.
+      en: How many containers there are across every host, in ranges. Never their names or images.
+  containers_auto_update:
+    type: int
+    min: 0
+    max: 10000
+    chart: nonzero
+    label: { es: Usan la etiqueta de autoactualización, en: Use the auto-update label }
+    description:
+      es: Cuántos contenedores llevan la etiqueta DCB-Auto-Update.
+      en: How many containers carry the DCB-Auto-Update label.
+  containers_ignore_updates:
+    type: int
+    min: 0
+    max: 10000
+    chart: nonzero
+    label: { es: Usan la etiqueta de ignorar actualizaciones, en: Use the ignore-updates label }
+    description:
+      es: Cuántos contenedores llevan la etiqueta DCB-Ignore-Check-Updates.
+      en: How many containers carry the DCB-Ignore-Check-Updates label.
+  docker_major:
+    type: int
+    min: 0
+    max: 1000
+    chart: histogram
+    buckets: ["0-23", "24", "25", "26", "27", "28", "29+"]
+    label: { es: Versión de Docker, en: Docker version }
+    description:
+      es: La versión principal de Docker del host donde corre el bot (por ejemplo, 27).
+      en: The major Docker version of the host the bot runs on (for example, 27).
+  schedules:
+    type: int
+    min: 0
+    max: 10000
+    chart: nonzero
+    label: { es: Con alguna programación, en: With a schedule }
+    description:
+      es: Cuántas tareas programadas hay activas. No su nombre, su hora ni su comando.
+      en: How many scheduled tasks are enabled. Not their name, time or command.
+  admins:
+    type: int
+    min: 0
+    max: 1000
+    chart: histogram
+    buckets: ["1", "2", "3+"]
+    label: { es: Administradores, en: Administrators }
+    description:
+      es: Cuántos administradores hay en TELEGRAM_ADMIN. Nunca sus IDs.
+      en: How many administrators TELEGRAM_ADMIN lists. Never their IDs.
+  telegram_group:
+    type: bool
+    chart: adoption
+    label: { es: Usado en un grupo, en: Used in a group }
+    description:
+      es: Si TELEGRAM_GROUP está configurado. No su ID.
+      en: Whether TELEGRAM_GROUP is set. Not its ID.
+  language:
+    type: enum
+    values: [es, en, cat, de, gl, it, nl, ru]
+    value_labels:
+      es: Español
+      en: English
+      cat: Català
+      de: Deutsch
+      gl: Galego
+      it: Italiano
+      nl: Nederlands
+      ru: Русский
+    chart: donut
+    label: { es: Idioma, en: Language }
+    description:
+      es: El idioma configurado en /settings.
+      en: The language set in /settings.
+  button_columns:
+    type: int
+    min: 1
+    max: 10
+    chart: histogram
+    buckets: ["1", "2", "3", "4+"]
+    label: { es: Columnas de botones, en: Button columns }
+    description:
+      es: El ajuste de columnas de botones.
+      en: The button columns setting.
+  check_updates:
+    type: bool
+    chart: adoption
+    label: { es: Comprobar actualizaciones, en: Check for updates }
+    description:
+      es: Si la comprobación de actualizaciones está activada.
+      en: Whether update checking is on.
+  check_update_every_hours:
+    type: number
+    min: 0
+    max: 10000
+    chart: histogram
+    buckets: ["0-1", "2-4", "5-12", "13-24", "25+"]
+    label: { es: Horas entre comprobaciones, en: Hours between checks }
+    description:
+      es: Cada cuántas horas se comprueban actualizaciones.
+      en: How many hours between update checks.
+  check_update_stopped_containers:
+    type: bool
+    chart: adoption
+    label: { es: Comprobar también los parados, en: Also check stopped ones }
+    description:
+      es: Si la comprobación incluye los contenedores parados.
+      en: Whether the check includes stopped containers.
+  extended_messages:
+    type: bool
+    chart: adoption
+    label: { es: Mensajes extendidos, en: Extended messages }
+    description:
+      es: Si los mensajes extendidos están activados.
+      en: Whether extended messages are on.
+  multi_selection:
+    type: bool
+    chart: adoption
+    label: { es: Selección múltiple, en: Multi-selection }
+    description:
+      es: Si la selección múltiple está activada.
+      en: Whether multi-selection is on.
+  notification_channel:
+    type: bool
+    chart: adoption
+    label: { es: Canal de notificaciones, en: Notification channel }
+    description:
+      es: Si hay un canal de notificaciones configurado. No cuál.
+      en: Whether a notification channel is set. Not which one.
+  legacy_volume:
+    type: bool
+    chart: adoption
+    label: { es: Usan aún el volumen /app/schedule, en: Still on the /app/schedule volume }
+    description:
+      es: Si el bot guarda sus datos en el volumen antiguo de la 4.x.
+      en: Whether the bot keeps its data on the old 4.x volume.
+
+usage:
+  description:
+    es: Cuántas veces al día se usó cada comando y cada botón, y cuántas veces se ejecutó cada tarea automática. Se envía una vez al día, sumado; nunca sobre qué contenedor, host o proyecto se hizo.
+    en: How many times a day each command and button was used, and how many times each automatic task ran. Sent once a day, added up; never which container, host or project it was about.
+  groups:
+    - prefix: cmd_
+      display: "/{name}"
+      label: { es: Comandos, en: Commands }
+      description: { es: Escritos o lanzados desde el menú de /start., en: Typed or launched from the /start menu. }
+    - prefix: btn_
+      label: { es: Botones, en: Buttons }
+      description: { es: Nombre interno de cada botón., en: Internal name of each button. }
+    - prefix: sched_
+      label: { es: Tareas programadas ejecutadas, en: Scheduled tasks run }
+    - prefix: auto_
+      label: { es: Automático, en: Automatic }
+  labels:
+    auto_update_check: { es: Comprobación de actualizaciones, en: Update check }
+    auto_label_update: { es: Autoactualización por etiqueta, en: Auto-update by label }
+    sched_run: { es: Iniciar, en: Run }
+    sched_stop: { es: Parar, en: Stop }
+    sched_restart: { es: Reiniciar, en: Restart }
+    sched_mute: { es: Silenciar, en: Mute }
+    sched_exec: { es: Ejecutar comando, en: Exec }
+    sched_prune: { es: Limpiar, en: Prune }

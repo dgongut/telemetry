@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+.pytest_cache/
+data/
+demo-data/
+# La configuración de cada servidor, fuera del repo para que git pull no choque.
+docker-compose.override.yaml
+.venv/

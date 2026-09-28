@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>dgongut · stats</title>
+	<meta name="description" content="Estadísticas anónimas de uso de los proyectos de código abierto de dgongut.">
+	<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+	<div class="wrap">
+		<header class="top" id="top"></header>
+		<div class="title-row">
+			<div>
+				<h1 id="title"></h1>
+				<p class="lead" id="lead"></p>
+			</div>
+		</div>
+		<div class="grid projects" id="projects"></div>
+	</div>
+	<script src="/static/vendor/chart.umd.js"></script>
+	<script src="/static/common.js"></script>
+	<script>
+	"use strict";
+
+	document.getElementById("title").textContent = t("projects");
+	document.getElementById("lead").textContent = t("projects_lead");
+	const container = document.getElementById("projects");
+	container.innerHTML = `<p class="empty">${escapeHtml(t("loading"))}</p>`;
+
+	api("/v1/projects").then((cards) => {
+		if (!cards.length) {
+			container.innerHTML = `<p class="empty">${escapeHtml(t("no_projects"))}</p>`;
+			return;
+		}
+		container.innerHTML = cards.map((card) => `
+			<a class="card project-card" href="/${encodeURIComponent(card.id)}">
+				<h2>${escapeHtml(card.name)}</h2>
+				<p class="sub" style="margin:0">${escapeHtml(card.description)}</p>
+				<div class="numbers">
+					<div><b>${fmt(card.active_30)}</b><span>${escapeHtml(t("active_30"))}</span></div>
+					<div><b>${fmt(card.active_7)}</b><span>${escapeHtml(t("active_7"))}</span></div>
+				</div>
+				<div class="spark"><canvas data-spark="${escapeHtml(card.id)}"></canvas></div>
+			</a>`).join("");
+
+		const color = palette()[0];
+		for (const card of cards) {
+			const canvas = container.querySelector(`[data-spark="${CSS.escape(card.id)}"]`);
+			new Chart(canvas, {
+				type: "line",
+				data: { labels: card.sparkline.map((_, i) => i), datasets: [{
+					data: card.sparkline, borderColor: color, borderWidth: 2, pointRadius: 0,
+					tension: 0.3, fill: true, backgroundColor: color + "22" }] },
+				options: { animation: false, events: [], scales: { x: { display: false }, y: { display: false, beginAtZero: true } },
+					plugins: { tooltip: { enabled: false } } },
+			});
+		}
+	}).catch(() => showError("projects"));
+	</script>
+</body>
+</html>
