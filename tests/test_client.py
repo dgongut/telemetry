@@ -21,7 +21,7 @@ import telemetry  # noqa: E402
 class Receiver:
 	"""A local HTTP server that records what it receives."""
 
-	def __init__(self, answer=None, status=200):
+	def __init__(self, answer=None, status=200, body=None):
 		self.received = []
 		receiver = self
 
@@ -32,7 +32,10 @@ class Receiver:
 				self.send_response(status)
 				self.send_header("Content-Type", "application/json")
 				self.end_headers()
-				self.wfile.write(json.dumps(answer or {"enabled": True, "next_ping_h": 24}).encode())
+				if body is None:
+					self.wfile.write(json.dumps(answer or {"enabled": True, "next_ping_h": 24}).encode())
+				else:
+					self.wfile.write(body)
 
 			def log_message(self, *args):
 				pass
@@ -155,6 +158,45 @@ def test_the_server_can_pause_a_project(tmp_path):
 		assert client._tick(now + 48 * 3600 + 1) is True
 	finally:
 		server.close()
+
+
+def test_a_200_that_is_not_json_counts_as_delivered(tmp_path):
+	# A proxy page in front of the server: the ping got there, so the counters
+	# must not go out a second time on the next one.
+	server = Receiver(body=b"<html>proxy</html>")
+	try:
+		client, _ = make(tmp_path, server.url)
+		client.count("cmd_list")
+		assert client._tick() is True
+		assert client.preview()["usage"] == {}
+	finally:
+		server.close()
+
+
+def write_state(tmp_path, **fields):
+	path = tmp_path / "state" / "telemetry.json"
+	path.parent.mkdir(parents=True, exist_ok=True)
+	path.write_text(json.dumps(fields))
+
+
+@pytest.mark.parametrize("field, value", [
+	("interval_hours", "24"), ("last_sent", "yesterday"), ("paused_until", [1]),
+	("last_sent", True), ("install_id", 7),
+])
+def test_a_corrupt_state_field_does_not_stop_the_sends(tmp_path, receiver, field, value):
+	write_state(tmp_path, **{field: value})
+	client, _ = make(tmp_path, receiver.url)
+	assert client._tick() is True
+	assert uuid.UUID(receiver.received[0]["install_id"])
+
+
+def test_a_corrupt_counter_does_not_make_count_raise(tmp_path, receiver):
+	write_state(tmp_path, pending={"cmd_list": "many", "cmd_logs": 2})
+	client, _ = make(tmp_path, receiver.url)
+	client.count("cmd_list")
+	client.count("cmd_logs")
+	assert client.preview()["usage"] == {"cmd_list": 1, "cmd_logs": 3}
+	assert client._tick() is True
 
 
 def test_a_broken_metrics_function_does_not_stop_the_send(tmp_path, receiver):

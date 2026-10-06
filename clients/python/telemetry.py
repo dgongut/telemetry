@@ -30,6 +30,7 @@ What it guarantees:
 """
 
 import json
+import math
 import os
 import platform
 import random
@@ -83,6 +84,13 @@ def disabled_by_environment():
 	"""
 	value = os.environ.get("TELEMETRY", "").strip().lower()
 	return value not in ("", "true")
+
+
+def _is_number(value):
+	# JSON also yields booleans, NaN and Infinity, none of which can be a
+	# timestamp, an interval or a counter.
+	return (isinstance(value, (int, float)) and not isinstance(value, bool)
+			and math.isfinite(value))
 
 
 def architecture():
@@ -219,22 +227,27 @@ class Telemetry:
 			method="POST")
 		try:
 			with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
-				answer = json.loads(response.read() or b"{}")
-			# Anything but an object is a server answering something else —a
-			# proxy page, a bare list—. The ping got there all the same, so it
-			# is taken as delivered: failing on answer.get() after the POST left
-			# the counters pending, and they went out again on the next ping.
-			if not isinstance(answer, dict):
-				answer = {}
+				body = response.read()
 		except urllib.error.HTTPError as e:
 			self._log(f"Telemetry rejected: HTTP {e.code}")
 			return False
 		except Exception as e:
 			self._log(f"Telemetry not sent: {e}")
 			return False
+		# Anything but a JSON object is a server answering something else —a
+		# proxy page, a bare list—. The ping got there all the same, so it is
+		# taken as delivered: failing after the POST left the counters pending,
+		# and they went out again on the next ping. Hence the parsing happens
+		# outside the try above, where an error would mean not sent.
+		try:
+			answer = json.loads(body or b"{}")
+		except ValueError:
+			answer = {}
+		if not isinstance(answer, dict):
+			answer = {}
 
 		interval = answer.get("next_ping_h", DEFAULT_INTERVAL_HOURS)
-		if not isinstance(interval, (int, float)) or isinstance(interval, bool):
+		if not _is_number(interval):
 			interval = DEFAULT_INTERVAL_HOURS
 		interval = min(max(interval, 1), MAX_INTERVAL_HOURS)
 
@@ -292,8 +305,20 @@ class Telemetry:
 				stored = json.load(handle)
 			if isinstance(stored, dict):
 				state.update({key: stored[key] for key in state if key in stored})
+			# A field of the wrong type (a hand-edited or half-written file)
+			# made every tick raise, so the installation never sent again, and
+			# a counter that is not a number made count() raise into the
+			# caller. Each bad field falls back to its empty value instead.
+			empty = self._empty_state()
+			for key in ("last_sent", "interval_hours", "paused_until"):
+				if not _is_number(state[key]):
+					state[key] = empty[key]
+			if not isinstance(state["install_id"], str):
+				state["install_id"] = None
 			if not isinstance(state["pending"], dict):
 				state["pending"] = {}
+			state["pending"] = {key: value for key, value in state["pending"].items()
+								if _is_number(value)}
 		except FileNotFoundError:
 			pass
 		except Exception as e:
