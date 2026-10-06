@@ -1,0 +1,231 @@
+# Torrent Controller Bot
+#
+# Everything the bot may send. The server drops any metric not declared here,
+# and the privacy page lists every one of them with its description.
+
+name: Torrent Controller Bot
+description:
+  es: Bot de Telegram para controlar Transmission, qBittorrent, Deluge o Download Station.
+  en: Telegram bot to control Transmission, qBittorrent, Deluge or Download Station.
+repo: https://github.com/dgongut/torrent-controller-bot
+opt_out:
+  es: Desde /settings → Estadísticas anónimas, o con TELEMETRY=false. Solo se envían si /config está en un volumen.
+  en: From /settings → Anonymous statistics, or with TELEMETRY=false. They are only sent when /config is on a volume.
+enabled: true
+interval_hours: 24
+
+metrics:
+  client:
+    type: enum
+    values: [transmission, qbittorrent, deluge, download_station]
+    value_labels:
+      transmission: Transmission
+      qbittorrent: qBittorrent
+      deluge: Deluge
+      download_station: Download Station
+    chart: donut
+    label: { es: Gestor de torrents, en: Torrent manager }
+    description:
+      es: Qué gestor de torrents controla el bot (TORRENT_CLIENT). No su dirección ni su usuario.
+      en: Which torrent manager the bot controls (TORRENT_CLIENT). Not its address or user.
+  transmission_major:
+    type: int
+    min: 0
+    max: 100
+    chart: histogram
+    buckets: ["0-2", "3", "4", "5+"]
+    label: { es: Versión de Transmission, en: Transmission version }
+    description:
+      es: La versión principal de Transmission (por ejemplo, 4). Solo cuando el gestor es Transmission.
+      en: The major Transmission version (for example, 4). Only when the manager is Transmission.
+  qbittorrent_major:
+    type: int
+    min: 0
+    max: 100
+    chart: histogram
+    buckets: ["0-3", "4", "5", "6+"]
+    label: { es: Versión de qBittorrent, en: qBittorrent version }
+    description:
+      es: La versión principal de qBittorrent (por ejemplo, 5). Solo cuando el gestor es qBittorrent.
+      en: The major qBittorrent version (for example, 5). Only when the manager is qBittorrent.
+  deluge_major:
+    type: int
+    min: 0
+    max: 100
+    chart: histogram
+    buckets: ["0-1", "2", "3+"]
+    label: { es: Versión de Deluge, en: Deluge version }
+    description:
+      es: La versión principal de Deluge (por ejemplo, 2). Solo cuando el gestor es Deluge.
+      en: The major Deluge version (for example, 2). Only when the manager is Deluge.
+  download_station_major:
+    type: int
+    min: 0
+    max: 100
+    chart: histogram
+    buckets: ["0-2", "3", "4+"]
+    label: { es: Versión de Download Station, en: Download Station version }
+    description:
+      es: La versión principal de Download Station (por ejemplo, 3). Solo cuando el gestor es Download Station.
+      en: The major Download Station version (for example, 3). Only when the manager is Download Station.
+  torrents:
+    type: enum
+    values: ["0", "1-10", "11-50", "51-100", "101-250", "251-500", "501-1000", "1001+"]
+    chart: bar
+    label: { es: Torrents por instalación, en: Torrents per installation }
+    description:
+      es: Cuántos torrents hay en el gestor, por tramos. Nunca sus nombres, sus rutas ni sus trackers.
+      en: How many torrents the manager holds, in ranges. Never their names, paths or trackers.
+  language:
+    type: enum
+    values: [es, en]
+    value_labels:
+      es: Español
+      en: English
+    chart: donut
+    label: { es: Idioma, en: Language }
+    description:
+      es: El idioma configurado en LANGUAGE.
+      en: The language set in LANGUAGE.
+  admins:
+    type: int
+    min: 0
+    max: 1000
+    chart: histogram
+    buckets: ["1", "2", "3+"]
+    label: { es: Administradores, en: Administrators }
+    description:
+      es: Cuántos administradores hay en TELEGRAM_ADMIN. Nunca sus IDs.
+      en: How many administrators TELEGRAM_ADMIN lists. Never their IDs.
+  telegram_group:
+    type: bool
+    chart: adoption
+    label: { es: Usado en un grupo, en: Used in a group }
+    description:
+      es: Si TELEGRAM_GROUP está configurado. No su ID.
+      en: Whether TELEGRAM_GROUP is set. Not its ID.
+  torrents_per_page:
+    type: int
+    min: 1
+    max: 1000
+    chart: histogram
+    buckets: ["1-5", "6-9", "10", "11-20", "21+"]
+    label: { es: Torrents por página, en: Torrents per page }
+    description:
+      es: El valor de TORRENTS_PER_PAGE.
+      en: The TORRENTS_PER_PAGE value.
+  notify_completed:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de descarga completada, en: Download completed notice }
+    description:
+      es: Si el aviso de descargas completadas está activado.
+      en: Whether the download completed notice is on.
+  notify_errors:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de errores, en: Error notice }
+    description:
+      es: Si el aviso de torrents con error está activado.
+      en: Whether the torrent error notice is on.
+  notify_external_added:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de añadidos externamente, en: Externally added notice }
+    description:
+      es: Si el aviso de torrents añadidos fuera del bot está activado.
+      en: Whether the notice for torrents added outside the bot is on.
+  auto_download:
+    type: bool
+    chart: adoption
+    label: { es: Descarga automática, en: Automatic download }
+    description:
+      es: Si los torrents se añaden sin preguntar el directorio.
+      en: Whether torrents are added without asking for the directory.
+  auto_download_dir:
+    type: bool
+    chart: adoption
+    label: { es: Con directorio automático propio, en: With its own automatic directory }
+    description:
+      es: Si hay un directorio automático elegido en lugar del del gestor. No cuál.
+      en: Whether an automatic directory is set instead of the manager's. Not which one.
+  auto_category:
+    type: bool
+    chart: adoption
+    label: { es: Con categoría automática, en: With an automatic category }
+    description:
+      es: Si hay una categoría automática elegida. No cuál.
+      en: Whether an automatic category is set. Not which one.
+  auto_rename:
+    type: bool
+    chart: adoption
+    label: { es: Renombrado automático, en: Automatic rename }
+    description:
+      es: Si el renombrado automático está activado y el gestor permite renombrar.
+      en: Whether automatic rename is on and the manager can rename.
+  auto_rename_files:
+    type: bool
+    chart: adoption
+    label: { es: Renombrado de subcarpetas y archivos, en: Rename of subfolders and files }
+    description:
+      es: Si el renombrado automático incluye las subcarpetas y los archivos.
+      en: Whether automatic rename includes subfolders and files.
+  auto_rename_external:
+    type: bool
+    chart: adoption
+    label: { es: Renombrado de los añadidos externamente, en: Rename of externally added ones }
+    description:
+      es: Si el renombrado automático incluye los torrents añadidos fuera del bot.
+      en: Whether automatic rename includes torrents added outside the bot.
+  low_space_warning:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de poco espacio, en: Low space warning }
+    description:
+      es: Si el aviso de poco espacio al añadir está activado.
+      en: Whether the low space warning when adding is on.
+  favorite_dirs:
+    type: int
+    min: 0
+    max: 1000
+    chart: nonzero
+    label: { es: Con directorios favoritos, en: With favorite directories }
+    description:
+      es: Cuántos directorios favoritos hay. Nunca sus rutas.
+      en: How many favorite directories there are. Never their paths.
+  custom_templates:
+    type: int
+    min: 0
+    max: 3
+    chart: histogram
+    buckets: ["0", "1", "2", "3"]
+    label: { es: Plantillas de renombrado propias, en: Custom rename templates }
+    description:
+      es: Cuántas de las tres plantillas de renombrado (película, serie, temporada) se han cambiado. No su contenido.
+      en: How many of the three rename templates (movie, series, season) were changed. Not their content.
+
+usage:
+  description:
+    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos y renombrados automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
+    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices and renames there were. Sent once a day, added up; never which torrent, directory or category it was about.
+  groups:
+    - prefix: cmd_
+      display: "/{name}"
+      label: { es: Comandos, en: Commands }
+      description: { es: Escritos o lanzados desde el menú del bot., en: Typed or launched from the bot menu. }
+    - prefix: btn_
+      label: { es: Botones, en: Buttons }
+      description: { es: Nombre interno de cada botón., en: Internal name of each button. }
+    - prefix: add_
+      label: { es: Torrents recibidos, en: Torrents received }
+      description: { es: Cómo se le envió cada torrent al bot., en: How each torrent was sent to the bot. }
+    - prefix: auto_
+      label: { es: Automático, en: Automatic }
+  labels:
+    add_file: { es: Fichero .torrent, en: .torrent file }
+    add_magnet: { es: Enlace magnet, en: Magnet link }
+    add_url: { es: URL de un .torrent, en: URL to a .torrent }
+    auto_notify_completed: { es: Aviso de descarga completada, en: Download completed notice }
+    auto_notify_error: { es: Aviso de error, en: Error notice }
+    auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
+    auto_rename: { es: Renombrado automático, en: Automatic rename }
