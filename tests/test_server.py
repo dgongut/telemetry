@@ -283,6 +283,44 @@ def test_months_become_totals_that_outlive_the_rows(tmp_path):
 	assert history[1]["active"] == 1 and history[1]["new"] == 0 and history[1]["retained"] == 1
 
 
+def test_values_stored_before_a_metric_changed_type_are_left_out(tmp_path):
+	"""
+	A manifest may turn a metric from ranges into a number. The rows sent
+	before still hold the old value, and mixing "11-50" with 30 broke the sum,
+	which took down the project's whole dashboard and the monthly totals.
+	"""
+	import rollup
+
+	def write_manifest(spec):
+		(projects / "counted.yaml").write_text(yaml.safe_dump({
+			"name": "Counted", "usage": {"description": "counters"},
+			"metrics": {"torrents": {**spec, "label": "Torrents", "description": "How many"}},
+		}))
+
+	projects = tmp_path / "projects"
+	projects.mkdir()
+	write_manifest({"type": "enum", "values": ["0", "1-50", "51+"], "chart": "bar"})
+	july = 1_783_000_000     # 2026-07-02
+	database = db_module.Database(str(tmp_path / "t.db"))
+	database.record({"project": "counted", "install_id": str(uuid.uuid4()), "version": "1.0.0", "arch": "arm64",
+					"metrics": {"torrents": "1-50"}, "usage": {}}, now=july)
+
+	write_manifest({"type": "int", "min": 0, "max": 1000, "kpi": "sum", "chart": "histogram", "buckets": ["0", "1-50", "51+"]})
+	manifests = manifest.load_all(str(projects))
+	database.record({"project": "counted", "install_id": str(uuid.uuid4()), "version": "1.1.0", "arch": "arm64",
+					"metrics": {"torrents": 30}, "usage": {}}, now=july)
+
+	data = summary.project(database, manifests["counted"], 30, now=july + 3600)
+	torrents = next(metric for metric in data["metrics"] if metric["key"] == "torrents")
+	assert torrents["reported"] == 1
+	assert torrents["kpi"]["value"] == 30
+
+	rollup.run(database, manifests, now=july + 31 * 86400)
+	facets = {(r["facet"], r["value"]): r["installs"] for r in database.query("SELECT * FROM monthly_facets")}
+	assert facets == {**{key: value for key, value in facets.items() if key[0] != "metric:torrents"},
+					("metric:torrents", "1-50"): 1}
+
+
 def test_a_database_from_an_earlier_version_gets_the_new_columns(tmp_path):
 	"""The first local database had no arch in daily, and every ping then failed."""
 	import sqlite3

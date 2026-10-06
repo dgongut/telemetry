@@ -24,6 +24,7 @@ import json
 
 from db import today
 from manifest import bucket_of
+from validate import metric_value
 
 
 def _month_bounds(month):
@@ -113,8 +114,9 @@ def rollup_month(db, manifest, month):
 		add("arch", row["arch"] or "unknown")
 		metrics = json.loads(row["metrics"])
 		for metric in manifest["metrics"]:
-			if metric["key"] in metrics:
-				add(f"metric:{metric['key']}", facet_value(metric, metrics[metric["key"]]))
+			value = metric_value(metric, metrics[metric["key"]]) if metric["key"] in metrics else None
+			if value is not None:
+				add(f"metric:{metric['key']}", facet_value(metric, value))
 
 	# Who came back from last month. It needs both months' install ids, which
 	# is why it is counted here: once the rows are gone it cannot be anymore.

@@ -18,6 +18,7 @@ from collections import Counter
 from db import day_offset, today
 from manifest import bucket_of, text
 import rollup
+from validate import metric_value
 
 RANGES = (7, 30, 90)
 TOP_VERSIONS = 6
@@ -178,7 +179,8 @@ def project(db, manifest, days, lang="en", now=None):
 	parsed = [json.loads(row["metrics"]) for row in installs]
 	metrics = []
 	for metric in manifest["metrics"]:
-		values = [entry[metric["key"]] for entry in parsed if metric["key"] in entry]
+		values = [metric_value(metric, entry[metric["key"]]) for entry in parsed if metric["key"] in entry]
+		values = [value for value in values if value is not None]
 		metrics.append(_metric_summary(metric, values, lang))
 
 	return {

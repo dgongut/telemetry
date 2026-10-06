@@ -43,8 +43,14 @@ def _number(value):
 	return value
 
 
-def _metric(metric, value):
-	"""The value if it is valid for `metric`, else None."""
+def metric_value(metric, value):
+	"""
+	The value if it is valid for `metric`, else None.
+
+	Also applied to what is read back from the database: a value stored under
+	an earlier manifest, before the metric changed type or range, no longer
+	fits, and is left out rather than mixed with the new ones.
+	"""
 	kind = metric["type"]
 	if kind == "bool":
 		return value if isinstance(value, bool) else None
@@ -86,7 +92,7 @@ def ping(body, manifests):
 	if isinstance(sent_metrics, dict):
 		for metric in manifest["metrics"]:
 			if metric["key"] in sent_metrics:
-				value = _metric(metric, sent_metrics[metric["key"]])
+				value = metric_value(metric, sent_metrics[metric["key"]])
 				if value is not None:
 					metrics[metric["key"]] = value
 

@@ -69,13 +69,17 @@ metrics:
       es: La versión principal de Download Station (por ejemplo, 3). Solo cuando el gestor es Download Station.
       en: The major Download Station version (for example, 3). Only when the manager is Download Station.
   torrents:
-    type: enum
-    values: ["0", "1-10", "11-50", "51-100", "101-250", "251-500", "501-1000", "1001+"]
-    chart: bar
+    type: int
+    min: 0
+    max: 1000000
+    kpi: sum
+    kpi_label: { es: Torrents gestionados, en: Torrents managed }
+    chart: histogram
+    buckets: ["0", "1-10", "11-50", "51-100", "101-250", "251-500", "501-1000", "1001+"]
     label: { es: Torrents por instalación, en: Torrents per installation }
     description:
-      es: Cuántos torrents hay en el gestor, por tramos. Nunca sus nombres, sus rutas ni sus trackers.
-      en: How many torrents the manager holds, in ranges. Never their names, paths or trackers.
+      es: Cuántos torrents hay en el gestor. Solo el número, nunca sus nombres, sus rutas ni sus trackers.
+      en: How many torrents the manager holds. Only the number, never their names, paths or trackers.
   language:
     type: enum
     values: [es, en]
