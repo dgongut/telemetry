@@ -1,0 +1,318 @@
+# DropBot
+#
+# Everything the bot may send. The server drops any metric not declared here,
+# and the privacy page lists every one of them with its description.
+
+name: DropBot
+description:
+  es: Bot de Telegram que descarga en tu servidor los ficheros y enlaces que le envías.
+  en: Telegram bot that downloads the files and links you send it to your server.
+repo: https://github.com/dgongut/dropbot
+opt_out:
+  es: Desde /settings → Estadísticas anónimas, o con TELEMETRY=false. Solo se envían si /config está en un volumen.
+  en: From /settings → Anonymous statistics, or with TELEMETRY=false. They are only sent when /config is on a volume.
+enabled: true
+interval_hours: 24
+
+metrics:
+  language:
+    type: enum
+    values: [es, en]
+    value_labels:
+      es: Español
+      en: English
+    chart: donut
+    label: { es: Idioma, en: Language }
+    description:
+      es: El idioma configurado en /settings.
+      en: The language set in /settings.
+  admins:
+    type: int
+    min: 0
+    max: 1000
+    chart: histogram
+    buckets: ["1", "2", "3+"]
+    label: { es: Administradores, en: Administrators }
+    description:
+      es: Cuántos administradores hay en TELEGRAM_ADMIN. Nunca sus IDs.
+      en: How many administrators TELEGRAM_ADMIN lists. Never their IDs.
+  parallel_downloads:
+    type: int
+    min: 1
+    max: 20
+    chart: histogram
+    buckets: ["1", "2", "3-4", "5-8", "9+"]
+    label: { es: Descargas simultáneas, en: Simultaneous downloads }
+    description:
+      es: Cuántos ficheros se transfieren a la vez, según /settings.
+      en: How many files are transferred at once, as set in /settings.
+  fast_connections:
+    type: int
+    min: 1
+    max: 20
+    chart: histogram
+    buckets: ["1", "2-4", "5-8", "9-12", "13+"]
+    label: { es: Conexiones por fichero, en: Connections per file }
+    description:
+      es: Cuántas conexiones paralelas se abren por fichero, según /settings.
+      en: How many parallel connections are opened per file, as set in /settings.
+  auto_format:
+    type: enum
+    values: [ask, video, audio]
+    value_labels:
+      ask: { es: Preguntar, en: Ask }
+      video: { es: Siempre vídeo, en: Always video }
+      audio: { es: Siempre audio, en: Always audio }
+    chart: donut
+    label: { es: Formato de los enlaces, en: Link format }
+    description:
+      es: Qué hace el bot al recibir un enlace (preguntar, vídeo o audio). Nunca el enlace.
+      en: What the bot does when it receives a link (ask, video or audio). Never the link.
+  auto_send:
+    type: enum
+    values: [ask, send, send_delete, store]
+    value_labels:
+      ask: { es: Preguntar, en: Ask }
+      send: { es: Enviar y guardar, en: Send and keep }
+      send_delete: { es: Enviar y borrar, en: Send and delete }
+      store: { es: Solo guardar, en: Keep only }
+    chart: donut
+    label: { es: Tras descargar un enlace, en: After downloading a link }
+    description:
+      es: Qué hace el bot con lo descargado desde un enlace.
+      en: What the bot does with what it downloaded from a link.
+  video_quality:
+    type: enum
+    values: [max, "2160", "1440", "1080", "720", "480", "360"]
+    value_labels:
+      max: { es: Máxima, en: Best }
+      "2160": 2160p
+      "1440": 1440p
+      "1080": 1080p
+      "720": 720p
+      "480": 480p
+      "360": 360p
+    chart: bar
+    label: { es: Calidad máxima de vídeo de los enlaces, en: Maximum video quality for links }
+    description:
+      es: El límite de resolución de lo que se descarga de un enlace, según /settings.
+      en: The resolution limit for what is downloaded from a link, as set in /settings.
+  audio_quality:
+    type: enum
+    values: [standard, high, best]
+    value_labels:
+      standard: { es: Estándar, en: Standard }
+      high: { es: Alta, en: High }
+      best: { es: Máxima, en: Best }
+    chart: donut
+    label: { es: Calidad del audio de los enlaces, en: Audio quality for links }
+    description:
+      es: La calidad del MP3 que se saca de un enlace, según /settings.
+      en: The quality of the MP3 taken from a link, as set in /settings.
+  prefer_compatible:
+    type: bool
+    chart: adoption
+    label: { es: Preferir vídeo compatible con Telegram, en: Prefer Telegram-compatible video }
+    description:
+      es: Si lo descargado de un enlace se pide en H.264 y AAC para no tener que convertirlo.
+      en: Whether what is downloaded from a link is requested as H.264 and AAC so it does not need converting.
+  audio_format:
+    type: enum
+    values: [mp3, m4a]
+    value_labels:
+      mp3: MP3
+      m4a: M4A
+    chart: donut
+    label: { es: Formato del audio de los enlaces, en: Audio format for links }
+    description:
+      es: Si el audio de un enlace se convierte a MP3 o se guarda en M4A sin recodificar.
+      en: Whether the audio from a link is converted to MP3 or kept as M4A without re-encoding.
+  audio_tags:
+    type: bool
+    chart: adoption
+    label: { es: Etiquetas y carátula en el audio, en: Tags and cover in the audio }
+    description:
+      es: Si se meten el título, el artista y la carátula en el audio descargado.
+      en: Whether the title, artist and cover art are embedded in the downloaded audio.
+  sponsorblock:
+    type: enum
+    values: ["off", sponsor, promo, all]
+    value_labels:
+      "off": { es: Desactivado, en: "Off" }
+      sponsor: { es: Patrocinios, en: Sponsors }
+      promo: { es: Patrocinios y autopromoción, en: Sponsors and self-promotion }
+      all: { es: Todo lo que no es contenido, en: Everything that is not content }
+    chart: donut
+    label: SponsorBlock
+    description:
+      es: Qué tramos de los vídeos de YouTube se quitan con SponsorBlock.
+      en: Which segments of YouTube videos are removed with SponsorBlock.
+  playlist_mode:
+    type: enum
+    values: [ask, full, first]
+    value_labels:
+      ask: { es: Preguntar, en: Ask }
+      full: { es: Siempre entera, en: Always all of it }
+      first: { es: Siempre el primero, en: Always the first }
+    chart: donut
+    label: { es: Al recibir una playlist, en: On a playlist }
+    description:
+      es: Qué hace el bot cuando el enlace es una playlist.
+      en: What the bot does when the link is a playlist.
+  playlist_limit:
+    type: int
+    min: 0
+    max: 10000
+    chart: histogram
+    buckets: ["0", "1-10", "11-25", "26-50", "51-100", "101+"]
+    label: { es: Tope de vídeos por playlist, en: Video cap per playlist }
+    description:
+      es: Cuántos vídeos se bajan como mucho de una playlist entera. 0 es sin tope.
+      en: How many videos are downloaded at most from a whole playlist. 0 means no cap.
+  max_size_mb:
+    type: int
+    min: 0
+    max: 1000000
+    chart: histogram
+    buckets: ["0", "1-512", "513-1024", "1025-2048", "2049-5120", "5121+"]
+    label: { es: Tamaño máximo de descarga (MB), en: Maximum download size (MB) }
+    description:
+      es: El tamaño máximo de lo que se descarga de un enlace. 0 es sin límite.
+      en: The maximum size of what is downloaded from a link. 0 means no limit.
+  extract_after:
+    type: enum
+    values: [ask, delete, keep]
+    value_labels:
+      ask: { es: Preguntar, en: Ask }
+      delete: { es: Borrar el comprimido, en: Delete the compressed file }
+      keep: { es: Conservar el comprimido, en: Keep the compressed file }
+    chart: donut
+    label: { es: Tras descomprimir, en: After extracting }
+    description:
+      es: Qué se hace con un fichero comprimido después de descomprimirlo.
+      en: What is done with a compressed file after extracting it.
+  ffmpeg_hw:
+    type: enum
+    values: [none, vaapi, nvenc, qsv]
+    value_labels:
+      none: CPU
+      vaapi: VAAPI
+      nvenc: NVENC
+      qsv: QSV
+    chart: donut
+    label: { es: Encoder de vídeo, en: Video encoder }
+    description:
+      es: Con qué se convierten los vídeos (CPU o el tipo de aceleración por hardware).
+      en: What videos are converted with (CPU or the kind of hardware acceleration).
+  ffmpeg_quality_custom:
+    type: bool
+    chart: adoption
+    label: { es: Calidad de vídeo a medida, en: Custom video quality }
+    description:
+      es: Si se ha elegido una calidad de conversión en vez de la del encoder. No cuál.
+      en: Whether a conversion quality was chosen instead of the encoder's. Not which one.
+  cookies:
+    type: bool
+    chart: adoption
+    label: { es: Cookies para yt-dlp, en: Cookies for yt-dlp }
+    description:
+      es: Si hay un fichero de cookies montado. Nunca su contenido.
+      en: Whether a cookies file is mounted. Never its contents.
+  gpu_device:
+    type: bool
+    chart: adoption
+    label: { es: GPU accesible, en: GPU available }
+    description:
+      es: Si el contenedor tiene acceso a /dev/dri.
+      en: Whether the container has access to /dev/dri.
+  folder_video:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para vídeos, en: Own folder for videos }
+    description:
+      es: Si /video está montada. Nunca la ruta.
+      en: Whether /video is mounted. Never the path.
+  folder_audio:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para audios, en: Own folder for audio }
+    description:
+      es: Si /audio está montada. Nunca la ruta.
+      en: Whether /audio is mounted. Never the path.
+  folder_photo:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para fotos, en: Own folder for photos }
+    description:
+      es: Si /photo está montada. Nunca la ruta.
+      en: Whether /photo is mounted. Never the path.
+  folder_torrent:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para torrents, en: Own folder for torrents }
+    description:
+      es: Si /torrent está montada. Nunca la ruta.
+      en: Whether /torrent is mounted. Never the path.
+  folder_ebook:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para libros, en: Own folder for books }
+    description:
+      es: Si /ebook está montada. Nunca la ruta.
+      en: Whether /ebook is mounted. Never the path.
+  folder_url_video:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para vídeos de enlaces, en: Own folder for videos from links }
+    description:
+      es: Si lo descargado como vídeo desde un enlace va aparte (/url_video, o /video si no está montada). Nunca la ruta.
+      en: Whether videos downloaded from links go somewhere else (/url_video, or /video when that is not mounted). Never the path.
+  folder_url_audio:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta propia para audios de enlaces, en: Own folder for audio from links }
+    description:
+      es: Si lo descargado como audio desde un enlace va aparte (/url_audio, o /audio si no está montada). Nunca la ruta.
+      en: Whether audio downloaded from links goes somewhere else (/url_audio, or /audio when that is not mounted). Never the path.
+
+usage:
+  description:
+    es: Cuántas veces al día se usó cada comando y cada botón, qué tipos de fichero y de enlace llegaron al bot y cuántos vídeos se convirtieron. Se envía una vez al día, sumado; nunca qué fichero, enlace o carpeta era.
+    en: How many times a day each command and button was used, which kinds of file and link reached the bot and how many videos were converted. Sent once a day, added up; never which file, link or folder it was.
+  groups:
+    - prefix: cmd_
+      display: "/{name}"
+      label: { es: Comandos, en: Commands }
+      description: { es: Escritos o lanzados desde el menú del bot., en: Typed or launched from the bot menu. }
+    - prefix: btn_
+      label: { es: Botones, en: Buttons }
+      description: { es: Nombre interno de cada botón., en: Internal name of each button. }
+    - prefix: file_
+      label: { es: Ficheros recibidos, en: Files received }
+      description: { es: El tipo de cada fichero enviado al bot., en: The type of each file sent to the bot. }
+    - prefix: url_
+      label: { es: Enlaces, en: Links }
+      description: { es: Cómo se descargó cada enlace., en: How each link was downloaded. }
+    - prefix: convert_
+      label: { es: Conversiones, en: Conversions }
+      description: { es: Con qué se convirtió cada vídeo., en: What each video was converted with. }
+    - prefix: send_
+      label: { es: Envíos, en: Sends }
+  labels:
+    file_video: { es: Vídeo, en: Video }
+    file_audio: { es: Audio, en: Audio }
+    file_photo: { es: Foto, en: Photo }
+    file_torrent: { es: Torrent, en: Torrent }
+    file_ebook: { es: Libro, en: Book }
+    file_other: { es: Otro, en: Other }
+    url_video: { es: Como vídeo, en: As video }
+    url_audio: { es: Como audio, en: As audio }
+    url_direct: { es: Descarga directa, en: Direct download }
+    url_playlist: { es: Playlist, en: Playlist }
+    convert_remux: { es: Sin recodificar, en: Without re-encoding }
+    convert_none: { es: CPU, en: CPU }
+    convert_vaapi: VAAPI
+    convert_nvenc: NVENC
+    convert_qsv: QSV
+    convert_fallback: { es: Reintento por CPU, en: CPU retry }
+    send_auto: { es: Envío automático, en: Automatic send }
