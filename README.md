@@ -24,7 +24,7 @@ navegador ──GET /───────────────────�
 server/           API (FastAPI) y base de datos (SQLite)
 web/              el panel: HTML, CSS y Chart.js servido desde aquí, sin CDNs
 projects/         un manifiesto por proyecto
-clients/python/   cliente de referencia, un fichero para copiar en cada proyecto
+clients/python/   cliente de referencia: un módulo sin dependencias, instalable con pip
 docs/             el protocolo
 scripts/          datos de demostración para trabajar en la web
 tests/
@@ -33,7 +33,7 @@ tests/
 ## Añadir un proyecto
 
 1. Crea `projects/<id>.yaml`. El nombre del fichero es el id del proyecto: minúsculas, números y guiones. Toma como ejemplo [projects/docker-controller-bot.yaml](projects/docker-controller-bot.yaml).
-2. Copia `clients/python/telemetry.py` en el proyecto, o implementa [el protocolo](docs/protocol.md) si es de otro lenguaje.
+2. Añade el cliente a su `requirements.txt` (ver [Cliente Python](#cliente-python)), o implementa [el protocolo](docs/protocol.md) si es de otro lenguaje.
 3. Reinicia el contenedor. Si un manifiesto tiene un error, el servidor no arranca y dice cuál es. No se lo salta, porque saltárselo significaría rechazar en silencio todos los envíos de ese proyecto.
 
 ### Manifiesto
@@ -71,6 +71,30 @@ usage:
 Los textos pueden ser una cadena o un `{es:, en:}`. Todos los metrics llevan `description` obligatoria: es lo que aparece en `stats.dgongut.com/<id>/privacy`.
 
 Las claves de `usage` no se declaran una a una, solo se validan por forma. Si hubiera que declararlas, cada botón nuevo de un proyecto se perdería en silencio hasta que alguien se acordara de añadirlo. Como son identificadores del código y nunca texto del usuario, basta con un patrón y un máximo de claves.
+
+## Cliente Python
+
+Los proyectos no copian el cliente: lo instalan desde un tag de este repo, sin PyPI. En su `requirements.txt`:
+
+```
+dgongut-telemetry @ https://github.com/dgongut/telemetry/archive/refs/tags/client-v1.0.0.zip#subdirectory=clients/python
+```
+
+Instala un único módulo, `telemetry`, así que en el código basta con `import telemetry`. Funciona igual en la imagen, en la CI y en local, porque todo pasa por `pip install -r requirements.txt`, y no necesita `git`: pip baja el `.zip` del tag.
+
+La versión queda fijada en cada proyecto: un cambio en el cliente no le llega hasta que sube el número en esa línea.
+
+### Publicar una versión
+
+1. Cambia el cliente en `clients/python/telemetry.py`, con sus tests en `tests/test_client.py`.
+2. Sube `version` en `clients/python/pyproject.toml` y el número de la línea de arriba (un test comprueba que coinciden).
+3. Haz commit y crea el tag `client-v<versión>`:
+   ```bash
+   git tag client-v1.0.0 && git push origin main client-v1.0.0
+   ```
+4. En cada proyecto, cambia el número del tag en su `requirements.txt`.
+
+Un tag publicado no se mueve: los proyectos que ya lo usan dependen de que siga siendo lo que era.
 
 ## Despliegue
 

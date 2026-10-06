@@ -1,0 +1,28 @@
+# The Python client as an installable package, so projects depend on a tagged
+# version instead of carrying a copy each. It installs the same single module,
+# `telemetry`, so `import telemetry` keeps working unchanged.
+#
+# Projects install it straight from a tag of this repository, with no PyPI:
+#
+#   dgongut-telemetry @ https://github.com/dgongut/telemetry/archive/refs/tags/client-v1.0.0.zip#subdirectory=clients/python
+#
+# A release is a tag named client-v<version>, and <version> has to be the one
+# below: tests/test_client_package.py checks they stay in step.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dgongut-telemetry"
+version = "1.0.0"
+description = "Anonymous usage statistics client for dgongut's projects"
+readme = { text = "See https://github.com/dgongut/telemetry", content-type = "text/plain" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.urls]
+Source = "https://github.com/dgongut/telemetry"
+
+[tool.setuptools]
+py-modules = ["telemetry"]

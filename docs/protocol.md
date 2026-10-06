@@ -60,4 +60,4 @@ No hay ningún otro campo. El servidor no puede pedir al cliente nada más.
 3. No enviar nunca texto que haya escrito el usuario: nombres, rutas, IDs, direcciones. Si algo tiene que ir, que vaya como número, sí/no o un valor de una lista cerrada que se declara en el manifiesto.
 4. No bloquear ni hacer fallar el programa que lo usa.
 
-El cliente de referencia en Python, [`clients/python/telemetry.py`](../clients/python/telemetry.py), cumple todo esto y está pensado para copiarse tal cual en cada proyecto.
+El cliente de referencia en Python, [`clients/python/telemetry.py`](../clients/python/telemetry.py), cumple todo esto. Los proyectos lo instalan con pip desde un tag de este repo: ver [Cliente Python](../README.md#cliente-python) en el README.

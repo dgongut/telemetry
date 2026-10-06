@@ -1,10 +1,10 @@
 """
 Anonymous usage statistics client.
 
-Reference client for https://github.com/dgongut/telemetry. It is one file with
-no dependencies beyond the standard library, meant to be copied into a
-project as it is: a package would be one more dependency to keep up to date
-for a hundred lines.
+Reference client for https://github.com/dgongut/telemetry. It is one module
+with no dependencies beyond the standard library, installed with pip from a
+tag of that repository (see "Cliente Python" in its README), so every project
+runs the same code and a fix reaches all of them by bumping one line.
 
 	stats = Telemetry(
 		project="my-project",
