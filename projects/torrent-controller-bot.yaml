@@ -181,6 +181,20 @@ metrics:
     description:
       es: Si el renombrado automático incluye los torrents añadidos fuera del bot.
       en: Whether automatic rename includes torrents added outside the bot.
+  auto_move_series:
+    type: bool
+    chart: adoption
+    label: { es: Series directas a su carpeta, en: Series straight to their folder }
+    description:
+      es: Si la descarga automática añade los episodios directamente en la carpeta de su serie cuando no hay dudas.
+      en: Whether automatic download adds episodes straight into the folder of their series when there is no doubt.
+  auto_move_series_external:
+    type: bool
+    chart: adoption
+    label: { es: Series a su carpeta en los añadidos externamente, en: Series to their folder for externally added ones }
+    description:
+      es: Si los episodios añadidos fuera del bot también se mueven a la carpeta de su serie.
+      en: Whether episodes added outside the bot are also moved to the folder of their series.
   low_space_warning:
     type: bool
     chart: adoption
@@ -210,8 +224,8 @@ metrics:
 
 usage:
   description:
-    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos y renombrados automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
-    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices and renames there were. Sent once a day, added up; never which torrent, directory or category it was about.
+    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos, renombrados y carpetas de serie automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
+    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices, renames and series folders there were. Sent once a day, added up; never which torrent, directory or category it was about.
   groups:
     - prefix: cmd_
       display: "/{name}"
@@ -233,3 +247,5 @@ usage:
     auto_notify_error: { es: Aviso de error, en: Error notice }
     auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
     auto_rename: { es: Renombrado automático, en: Automatic rename }
+    auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
+    auto_series_suggestion: { es: Carpeta de la serie sugerida, en: Series folder suggested }
