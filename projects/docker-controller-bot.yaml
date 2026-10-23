@@ -80,6 +80,24 @@ metrics:
     description:
       es: Cuántos contenedores llevan la etiqueta DCB-Ignore-Check-Updates.
       en: How many containers carry the DCB-Ignore-Check-Updates label.
+  containers_auto_update_bot:
+    type: int
+    min: 0
+    max: 10000
+    chart: nonzero
+    label: { es: Autoactualizan desde el bot, en: Auto-update set from the bot }
+    description:
+      es: Cuántos contenedores tienen la actualización automática elegida desde el bot (/info o /settings), sin la etiqueta DCB-Auto-Update. Nunca cuáles.
+      en: How many containers are set to update on their own from the bot (/info or /settings), without the DCB-Auto-Update label. Never which ones.
+  containers_ignore_updates_bot:
+    type: int
+    min: 0
+    max: 10000
+    chart: nonzero
+    label: { es: Ignoran actualizaciones desde el bot, en: Ignore updates set from the bot }
+    description:
+      es: Cuántos contenedores tienen ignorar actualizaciones elegido desde el bot (/info o /settings), sin la etiqueta DCB-Ignore-Check-Updates. Nunca cuáles.
+      en: How many containers are set to ignore updates from the bot (/info or /settings), without the DCB-Ignore-Check-Updates label. Never which ones.
   docker_major:
     type: int
     min: 0
@@ -215,6 +233,7 @@ usage:
   labels:
     auto_update_check: { es: Comprobación de actualizaciones, en: Update check }
     auto_label_update: { es: Autoactualización por etiqueta, en: Auto-update by label }
+    auto_bot_update: { es: Autoactualización elegida en el bot, en: Auto-update set in the bot }
     sched_run: { es: Iniciar, en: Run }
     sched_stop: { es: Parar, en: Stop }
     sched_restart: { es: Reiniciar, en: Restart }
