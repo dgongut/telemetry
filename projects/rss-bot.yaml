@@ -204,6 +204,17 @@ metrics:
     description:
       es: Cuántas suscripciones añaden botones para abrir, escuchar o comentar.
       en: How many subscriptions add buttons to open, listen or comment.
+  format_kv:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Con datos del resumen, en: With summary data }
+    chart: none
+    label: { es: Formato, datos del resumen, en: Format, summary data }
+    description:
+      es: Cuántas suscripciones muestran datos sueltos de la descripción, del tipo «Tamaño. 4 GB». Solo el número, nunca qué datos.
+      en: How many subscriptions show loose data from the description, such as «Size. 4 GB». Only the number, never which data.
   messages_sent_total:
     type: int
     min: 0
@@ -259,6 +270,9 @@ usage:
     - prefix: auto_
       label: { es: Automático, en: Automatic }
   labels:
+    fmt_kv_on: { es: Dato del resumen activado, en: Summary data turned on }
+    fmt_kv_off: { es: Dato del resumen desactivado, en: Summary data turned off }
+    fmt_kv_clear: { es: Datos del resumen quitados, en: Summary data cleared }
     add_ok: { es: Feed añadido, en: Feed added }
     add_discovered: { es: Feed localizado desde una web, en: Feed found from a web page }
     add_exists: { es: Ya estaba añadido, en: Already added }
