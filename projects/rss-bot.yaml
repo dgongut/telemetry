@@ -1,0 +1,271 @@
+# RSS Bot
+#
+# Everything the bot may send. The server drops any metric not declared here,
+# and the privacy page lists every one of them with its description.
+#
+# A single instance run by its author, used by many chats: the metrics are the
+# bot's totals, so each one is a kpi rather than a chart per installation.
+
+name: RSS Bot
+description:
+  es: Bot de Telegram que publica las novedades de feeds RSS y Atom en chats, grupos y topics.
+  en: Telegram bot that posts new items from RSS and Atom feeds to chats, groups and topics.
+opt_out:
+  es: Lo envía solo la instancia del autor, con los totales del bot. Se desactiva con TELEMETRY=false, y solo se envía si /config está en un volumen.
+  en: Only the author's instance sends it, with the bot's totals. It is turned off with TELEMETRY=false, and only sent when /config is on a volume.
+enabled: true
+interval_hours: 24
+
+metrics:
+  feeds:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Suscripciones, en: Subscriptions }
+    chart: none
+    label: { es: Suscripciones a feeds, en: Feed subscriptions }
+    description:
+      es: Cuántas suscripciones a feeds hay en total. Solo el número, nunca sus URLs ni sus nombres.
+      en: How many feed subscriptions there are in total. Only the number, never their URLs or names.
+  feed_urls:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Feeds distintos, en: Distinct feeds }
+    chart: none
+    label: { es: Feeds distintos, en: Distinct feeds }
+    description:
+      es: Cuántas URLs de feed distintas se descargan. No cuáles.
+      en: How many distinct feed URLs are fetched. Not which ones.
+  chats:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Chats con feeds, en: Chats with feeds }
+    chart: none
+    label: { es: Chats con feeds, en: Chats with feeds }
+    description:
+      es: En cuántos chats hay al menos un feed. Nunca sus IDs.
+      en: How many chats have at least one feed. Never their IDs.
+  chats_group:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Grupos con feeds, en: Groups with feeds }
+    chart: none
+    label: { es: Grupos con feeds, en: Groups with feeds }
+    description:
+      es: Cuántos de esos chats son grupos y no conversaciones privadas.
+      en: How many of those chats are groups rather than private chats.
+  topics:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Topics con feeds, en: Topics with feeds }
+    chart: none
+    label: { es: Topics con feeds, en: Topics with feeds }
+    description:
+      es: En cuántos topics de grupos con temas hay feeds.
+      en: How many topics of forum groups have feeds.
+  feeds_paused:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: En pausa, en: Paused }
+    chart: none
+    label: { es: Feeds en pausa, en: Paused feeds }
+    description:
+      es: Cuántas suscripciones están en pausa.
+      en: How many subscriptions are paused.
+  feeds_failing:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Fallando, en: Failing }
+    chart: none
+    label: { es: Feeds que fallan, en: Failing feeds }
+    description:
+      es: Cuántas suscripciones fallaron en su última descarga.
+      en: How many subscriptions failed on their last fetch.
+  feeds_alias:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Con nombre propio, en: With a custom name }
+    chart: none
+    label: { es: Feeds renombrados, en: Renamed feeds }
+    description:
+      es: Cuántas suscripciones tienen un nombre puesto por el usuario. No cuál.
+      en: How many subscriptions have a name set by the user. Not which one.
+  feeds_custom_format:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Con formato propio, en: With a custom format }
+    chart: none
+    label: { es: Feeds con formato propio, en: Feeds with a custom format }
+    description:
+      es: Cuántas suscripciones muestran algo más que el nombre y el título de cada noticia.
+      en: How many subscriptions show more than the name and title of each item.
+  format_name:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Muestran el nombre, en: Show the name }
+    chart: none
+    label: { es: Formato, nombre del feed, en: Format, feed name }
+    description:
+      es: Cuántas suscripciones ponen el nombre del feed delante de cada noticia.
+      en: How many subscriptions put the feed name before each item.
+  format_date:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Muestran la fecha, en: Show the date }
+    chart: none
+    label: { es: Formato, fecha, en: Format, date }
+    description:
+      es: Cuántas suscripciones muestran la fecha de cada noticia.
+      en: How many subscriptions show the date of each item.
+  format_author:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Muestran el autor, en: Show the author }
+    chart: none
+    label: { es: Formato, autor, en: Format, author }
+    description:
+      es: Cuántas suscripciones muestran el autor de cada noticia.
+      en: How many subscriptions show the author of each item.
+  format_summary:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Muestran el resumen, en: Show the summary }
+    chart: none
+    label: { es: Formato, resumen, en: Format, summary }
+    description:
+      es: Cuántas suscripciones muestran el resumen de cada noticia.
+      en: How many subscriptions show the summary of each item.
+  format_tags:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Muestran las etiquetas, en: Show the tags }
+    chart: none
+    label: { es: Formato, etiquetas, en: Format, tags }
+    description:
+      es: Cuántas suscripciones muestran las etiquetas de cada noticia.
+      en: How many subscriptions show the tags of each item.
+  format_image:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Envían la imagen, en: Send the image }
+    chart: none
+    label: { es: Formato, imagen, en: Format, image }
+    description:
+      es: Cuántas suscripciones envían la imagen de cada noticia como foto.
+      en: How many subscriptions send each item's image as a photo.
+  format_preview:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Con previsualización, en: With link preview }
+    chart: none
+    label: { es: Formato, previsualización, en: Format, link preview }
+    description:
+      es: Cuántas suscripciones muestran la previsualización web del enlace.
+      en: How many subscriptions show the web preview of the link.
+  format_button:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Con botones, en: With buttons }
+    chart: none
+    label: { es: Formato, botones, en: Format, buttons }
+    description:
+      es: Cuántas suscripciones añaden botones para abrir, escuchar o comentar.
+      en: How many subscriptions add buttons to open, listen or comment.
+  messages_sent_total:
+    type: int
+    min: 0
+    max: 1000000000000
+    kpi: sum
+    kpi_label: { es: Mensajes enviados (histórico), en: Messages sent (all time) }
+    chart: none
+    label: { es: Mensajes enviados desde el principio, en: Messages sent since the start }
+    description:
+      es: Cuántos mensajes ha enviado el bot desde que existe, el mismo número que muestra /stats.
+      en: How many messages the bot has sent since it started, the same number /stats shows.
+  chats_reached_total:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Chats alcanzados (histórico), en: Chats reached (all time) }
+    chart: none
+    label: { es: Chats alcanzados desde el principio, en: Chats reached since the start }
+    description:
+      es: En cuántos chats distintos ha escrito el bot alguna vez, el mismo número que muestra /stats. Nunca sus IDs.
+      en: How many different chats the bot has ever written to, the same number /stats shows. Never their IDs.
+  time_between_updates:
+    type: int
+    min: 1
+    max: 1000000
+    kpi: mean
+    kpi_label: { es: Segundos entre escaneos, en: Seconds between scans }
+    chart: none
+    label: { es: Intervalo de escaneo, en: Scan interval }
+    description:
+      es: El valor de TIME_BETWEEN_UPDATES, en segundos.
+      en: The TIME_BETWEEN_UPDATES value, in seconds.
+
+usage:
+  description:
+    es: Cuántas veces al día se usó cada comando y cada botón, cuántos feeds se añadieron, qué campos del formato se activaron o desactivaron y cuántas noticias se enviaron. Se envía una vez al día, sumado; nunca sobre qué chat, feed o noticia.
+    en: How many times a day each command and button was used, how many feeds were added, which format fields were turned on or off and how many items were sent. Sent once a day, added up; never which chat, feed or item it was about.
+  groups:
+    - prefix: cmd_
+      display: "/{name}"
+      label: { es: Comandos, en: Commands }
+      description: { es: Escritos o lanzados desde el menú del bot., en: Typed or launched from the bot menu. }
+    - prefix: btn_
+      label: { es: Botones, en: Buttons }
+      description: { es: Nombre interno de cada botón del panel., en: Internal name of each panel button. }
+    - prefix: fmt_
+      label: { es: Formato, en: Format }
+      description: { es: Qué campo se activó (on) o desactivó (off)., en: Which field was turned on or off. }
+    - prefix: add_
+      label: { es: Altas, en: Additions }
+      description: { es: Cómo terminó cada intento de añadir un feed., en: How each attempt to add a feed ended. }
+    - prefix: auto_
+      label: { es: Automático, en: Automatic }
+  labels:
+    add_ok: { es: Feed añadido, en: Feed added }
+    add_discovered: { es: Feed localizado desde una web, en: Feed found from a web page }
+    add_exists: { es: Ya estaba añadido, en: Already added }
+    add_invalid: { es: URL que no es un feed, en: URL that is not a feed }
+    auto_entry_sent: { es: Noticia enviada, en: Item sent }
+    auto_entry_photo: { es: Noticia enviada con foto, en: Item sent with a photo }
+    auto_entry_photo_failed: { es: Foto no admitida, enviada como texto, en: Photo rejected, sent as text }
+    auto_feed_removed: { es: Feed borrado tras fallar una semana, en: Feed removed after failing for a week }
+    auto_chat_removed: { es: Chat que bloqueó o expulsó al bot, en: Chat that blocked or removed the bot }
+    auto_topic_removed: { es: Topic cerrado o borrado, en: Topic closed or deleted }
