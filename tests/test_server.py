@@ -334,3 +334,50 @@ def test_a_database_from_an_earlier_version_gets_the_new_columns(tmp_path):
 	database.record({"project": PROJECT, "install_id": str(uuid.uuid4()), "version": "5.0.0", "arch": "arm64",
 					"metrics": {}, "usage": {"cmd_list": 1}})
 	assert database.query("SELECT arch FROM daily")[0]["arch"] == "arm64"
+
+
+def test_a_single_instance_leads_with_its_headline_and_its_links(tmp_path):
+	"""
+	A bot run by its author as one instance: "1 active installation" says
+	nothing, so the page and the landing card lead with a metric instead.
+	"""
+	projects = tmp_path / "projects"
+	projects.mkdir()
+	(projects / "solo.yaml").write_text(yaml.safe_dump({
+		"name": "Solo", "usage": {"description": "counters"},
+		"single_instance": True, "headline": "users_active",
+		"links": [{"label": {"es": "Abrir en Telegram", "en": "Open in Telegram"}, "url": "https://t.me/solo_bot"}],
+		"metrics": {"users_active": {"type": "int", "min": 0, "max": 1000000, "kpi": "sum",
+									"label": "Users", "kpi_label": "Active users", "description": "How many"}},
+	}))
+	manifests = manifest.load_all(str(projects))
+	database = db_module.Database(str(tmp_path / "t.db"))
+	install = str(uuid.uuid4())
+	july = 1_783_000_000     # 2026-07-02
+	for day, users in ((0, 40), (2, 55)):
+		database.record({"project": "solo", "install_id": install, "version": "1.7.0", "arch": "amd64",
+						"metrics": {"users_active": users}, "usage": {}}, now=july + day * 86400)
+
+	data = summary.project(database, manifests["solo"], 7, lang="es", now=july + 2 * 86400 + 60)
+	assert data["project"]["single_instance"] is True
+	assert data["project"]["links"] == [{"label": "Abrir en Telegram", "url": "https://t.me/solo_bot"}]
+	headline = data["headline"]
+	assert headline["label"] == "Active users" and headline["latest"] == 55
+	# A day without a ping is a gap, not a drop to zero.
+	assert headline["values"][-3:] == [40, None, 55]
+
+	card = summary.overview(database, manifests, now=july + 2 * 86400 + 60)[0]
+	assert card["headline"] == {"label": "Active users", "latest": 55}
+	assert card["sparkline"][-3:] == [40, 0, 55]
+
+
+@pytest.mark.parametrize("change", [
+	{"headline": "nope"},
+	{"links": [{"label": "x", "url": "http://insecure"}]},
+	{"links": [{"url": "https://t.me/x"}]},
+])
+def test_a_bad_headline_or_link_stops_the_manifest(change):
+	document = {"name": "Solo", "usage": {"description": "counters"},
+				"metrics": {"n": {"type": "int", "min": 0, "max": 1, "description": "n"}}, **change}
+	with pytest.raises(manifest.ManifestError):
+		manifest.parse("solo", document)

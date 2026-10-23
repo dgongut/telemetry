@@ -15,8 +15,35 @@ opt_out:
   en: Only the author's instance sends it, with the bot's totals. It is turned off with TELEMETRY=false, and only sent when /config is on a volume.
 enabled: true
 interval_hours: 24
+single_instance: true
+headline: chats
+links:
+  - label: { es: Abrir @rss_lector_bot en Telegram, en: Open @rss_lector_bot in Telegram }
+    url: https://t.me/rss_lector_bot
 
 metrics:
+  chats:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Usuarios únicos, en: Unique users }
+    chart: none
+    label: { es: Usuarios únicos, en: Unique users }
+    description:
+      es: Cuántos chats (personas o grupos) tienen al menos un feed. Solo el número, nunca sus IDs.
+      en: How many chats (people or groups) have at least one feed. Only the number, never their IDs.
+  feeds_active:
+    type: int
+    min: 0
+    max: 10000000
+    kpi: sum
+    kpi_label: { es: Feeds activos, en: Active feeds }
+    chart: none
+    label: { es: Feeds activos, en: Active feeds }
+    description:
+      es: Cuántas suscripciones no están en pausa y se descargaron bien la última vez.
+      en: How many subscriptions are not paused and were fetched fine the last time.
   feeds:
     type: int
     min: 0
@@ -39,17 +66,6 @@ metrics:
     description:
       es: Cuántas URLs de feed distintas se descargan. No cuáles.
       en: How many distinct feed URLs are fetched. Not which ones.
-  chats:
-    type: int
-    min: 0
-    max: 10000000
-    kpi: sum
-    kpi_label: { es: Chats con feeds, en: Chats with feeds }
-    chart: none
-    label: { es: Chats con feeds, en: Chats with feeds }
-    description:
-      es: En cuántos chats hay al menos un feed. Nunca sus IDs.
-      en: How many chats have at least one feed. Never their IDs.
   chats_group:
     type: int
     min: 0
@@ -231,7 +247,7 @@ metrics:
     min: 0
     max: 10000000
     kpi: sum
-    kpi_label: { es: Chats alcanzados (histórico), en: Chats reached (all time) }
+    kpi_label: { es: Usuarios únicos (histórico), en: Unique users (all time) }
     chart: none
     label: { es: Chats alcanzados desde el principio, en: Chats reached since the start }
     description:

@@ -78,6 +78,46 @@ def _series(db, project, first_day, last_day):
 	return {"days": days, "daily": daily, "rolling7": rolling}
 
 
+def _headline_series(db, manifest, first_day, last_day, lang):
+	"""
+	The headline metric day by day, added up over the installations that sent
+	it that day. Days without any ping are None, not 0: no data is not "nobody".
+	"""
+	key = manifest.get("headline")
+	if not key:
+		return None
+	metric = next(m for m in manifest["metrics"] if m["key"] == key)
+	rows = db.query(
+		"SELECT day, metrics FROM daily WHERE project = ? AND day BETWEEN ? AND ?",
+		(manifest["id"], first_day, last_day))
+	by_day = {}
+	for row in rows:
+		try:
+			value = metric_value(metric, json.loads(row["metrics"]).get(key))
+		except (ValueError, TypeError):
+			value = None
+		if value is not None:
+			by_day[row["day"]] = by_day.get(row["day"], 0) + value
+
+	days, values = [], []
+	day = first_day
+	while day <= last_day:
+		days.append(day)
+		values.append(by_day.get(day))
+		day = day_offset(day, 1)
+	latest = next((value for value in reversed(values) if value is not None), None)
+	return {"key": key, "label": text(metric.get("kpi_label") or metric["label"], lang),
+			"days": days, "values": values, "latest": latest}
+
+
+def _project_header(manifest, lang):
+	return {"id": manifest["id"], "name": manifest["name"],
+			"description": text(manifest["description"], lang), "repo": manifest["repo"],
+			"single_instance": manifest.get("single_instance", False),
+			"links": [{"label": text(link["label"], lang), "url": link["url"]}
+					for link in manifest.get("links", [])]}
+
+
 def _metric_summary(metric, values, lang):
 	"""One metric over the installations that reported it."""
 	summary = {
@@ -184,8 +224,7 @@ def project(db, manifest, days, lang="en", now=None):
 		metrics.append(_metric_summary(metric, values, lang))
 
 	return {
-		"project": {"id": project_id, "name": manifest["name"],
-					"description": text(manifest["description"], lang), "repo": manifest["repo"]},
+		"project": _project_header(manifest, lang),
 		"days": days,
 		"generated_at": int(now if now is not None else time.time()),
 		"kpis": {
@@ -198,6 +237,9 @@ def project(db, manifest, days, lang="en", now=None):
 		},
 		# Up to yesterday: today is still arriving, and would always read as a drop.
 		"series": _series(db, project_id, day_offset(first_day, -1), day_offset(last_day, -1)),
+		# Up to today: unlike installations, a headline value is a snapshot
+		# that does not grow as the day goes on.
+		"headline": _headline_series(db, manifest, first_day, last_day, lang),
 		# Every complete month, however old: this is the part that is kept.
 		"monthly": rollup.history(db, project_id),
 		"versions": shown_versions,
@@ -214,14 +256,17 @@ def overview(db, manifests, lang="en", now=None):
 	cards = []
 	for manifest in manifests.values():
 		first_day = day_offset(last_day, -29)
-		cards.append({
-			"id": manifest["id"],
-			"name": manifest["name"],
-			"description": text(manifest["description"], lang),
-			"repo": manifest["repo"],
+		card = _project_header(manifest, lang)
+		card.update({
 			"active_30": _active_between(db, manifest["id"], first_day, last_day),
 			"active_7": _active_between(db, manifest["id"], day_offset(last_day, -6), last_day),
 			"sparkline": _series(db, manifest["id"], day_offset(first_day, -1), day_offset(last_day, -1))["rolling7"],
 		})
-	cards.sort(key=lambda card: -card["active_30"])
+		headline = _headline_series(db, manifest, first_day, last_day, lang)
+		if headline:
+			card["headline"] = {"label": headline["label"], "latest": headline["latest"]}
+			card["sparkline"] = [value or 0 for value in headline["values"]]
+		cards.append(card)
+	# A single instance would always sit last behind projects with many installs.
+	cards.sort(key=lambda card: -max(card["active_30"], (card.get("headline") or {}).get("latest") or 0))
 	return cards

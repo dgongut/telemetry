@@ -37,9 +37,10 @@
 			<a class="card project-card" href="/${encodeURIComponent(card.id)}">
 				<h2>${escapeHtml(card.name)}</h2>
 				<p class="sub" style="margin:0">${escapeHtml(card.description)}</p>
-				<div class="numbers">
-					<div><b>${fmt(card.active_30)}</b><span>${escapeHtml(t("active_30"))}</span></div>
-					<div><b>${fmt(card.active_7)}</b><span>${escapeHtml(t("active_7"))}</span></div>
+				<div class="numbers">${card.headline
+					? `<div><b>${card.headline.latest === null ? "–" : fmt(card.headline.latest)}</b><span>${escapeHtml(card.headline.label)}</span></div>`
+					: `<div><b>${fmt(card.active_30)}</b><span>${escapeHtml(t("active_30"))}</span></div>
+					<div><b>${fmt(card.active_7)}</b><span>${escapeHtml(t("active_7"))}</span></div>`}
 				</div>
 				<div class="spark"><canvas data-spark="${escapeHtml(card.id)}"></canvas></div>
 			</a>`).join("");

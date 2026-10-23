@@ -28,7 +28,7 @@ function barRows(items, colorIndex) {
 		<div class="bar-row" title="${escapeHtml(item.title || "")}">
 			<span class="name">${item.html}</span>
 			<span class="track"><span class="fill" style="width:${Math.max(0, Math.min(100, item.share * 100))}%;background:${color}"></span></span>
-			<span class="pct">${escapeHtml(pct(item.share))}</span>
+			<span class="pct">${escapeHtml(item.value !== undefined ? item.value : pct(item.share))}</span>
 		</div>`).join("");
 }
 
@@ -85,6 +85,23 @@ function drawSeries(series) {
 	}));
 }
 
+function drawHeadline(headline) {
+	const color = palette()[0];
+	const labels = headline.days.map((day) => {
+		const [, month, date] = day.split("-");
+		return `${Number(date)}/${Number(month)}`;
+	});
+	charts.push(new Chart(document.getElementById("series"), {
+		type: "line",
+		data: { labels, datasets: [{ label: headline.label, data: headline.values, borderColor: color,
+			backgroundColor: color + "22", fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2, spanGaps: true }] },
+		options: {
+			interaction: { mode: "index", intersect: false },
+			scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8, autoSkip: true } }, y: { beginAtZero: true } },
+		},
+	}));
+}
+
 function drawMonthly(months) {
 	const colors = palette();
 	const locale = LANG === "es" ? "es-ES" : "en-GB";
@@ -107,16 +124,22 @@ function drawMonthly(months) {
 	}));
 }
 
-function usageCard(group, index) {
+function usageCard(group, index, single) {
+	// With one instance "% of installations" is always 100 %: the bars compare
+	// how many times each one was used instead, and show that number.
+	const most = Math.max(1, ...group.items.map((item) => item.total));
+	if (single) group.items.sort((a, b) => b.total - a.total || a.key.localeCompare(b.key));
 	const items = group.items.map((item) => ({
 		html: `${escapeHtml(item.label)}`,
 		title: `${item.key} · ${t("times", { n: fmt(item.total) })}`,
-		share: item.share,
+		share: single ? item.total / most : item.share,
+		value: single ? fmt(item.total) : undefined,
 	}));
 	const hidden = items.length > USAGE_PREVIEW;
 	const body = `<div class="bars" data-usage="${index}">${barRows(hidden ? items.slice(0, USAGE_PREVIEW) : items, index % 3)}</div>` +
 		(hidden ? `<button type="button" class="more" data-more="${index}">${escapeHtml(t("show_all", { n: items.length }))}</button>` : "");
-	return { html: card(group.label, group.description ? `${group.description} ${t("usage_sub")}` : t("usage_sub"), body), items };
+	const sub = single ? t("usage_sub_single") : t("usage_sub");
+	return { html: card(group.label, group.description ? `${group.description} ${sub}` : sub, body), items };
 }
 
 function render(data) {
@@ -125,20 +148,23 @@ function render(data) {
 	const target = document.getElementById("dashboard");
 	const k = data.kpis;
 	const metrics = data.metrics;
+	const single = data.project.single_instance;
 
-	const kpis = [
+	const kpis = single ? [] : [
 		kpi(t("active"), fmt(k.active), delta(k.active, k.active_previous)),
 		kpi(t("new"), fmt(k.new), delta(k.new, k.new_previous)),
 	];
 	for (const metric of metrics) {
 		if (!metric.kpi) continue;
-		const extra = metric.kpi.kind === "sum"
+		const extra = metric.kpi.kind === "sum" && !single
 			? `<span class="delta">${escapeHtml(t("per_install", { n: fmt1(metric.kpi.mean) }))}</span>` : "";
 		kpis.push(kpi(metric.kpi_label, metric.kpi.kind === "sum" ? fmt(metric.kpi.value) : fmt1(metric.kpi.value), extra));
 	}
 	if (k.latest_version) {
-		kpis.push(kpi(t("latest"), escapeHtml(pct(k.latest_version_share)),
-			`<span class="delta">${escapeHtml(k.latest_version)}</span>`));
+		kpis.push(single
+			? kpi(t("version"), escapeHtml(k.latest_version))
+			: kpi(t("latest"), escapeHtml(pct(k.latest_version_share)),
+				`<span class="delta">${escapeHtml(k.latest_version)}</span>`));
 	}
 
 	if (!k.active) {
@@ -146,31 +172,39 @@ function render(data) {
 		return;
 	}
 
-	const usage = data.usage.map(usageCard);
+	const usage = data.usage.map((group, index) => usageCard(group, index, single));
 	const charted = metrics.filter((m) => m.reported && ["histogram", "bar", "donut"].includes(m.chart));
 	const adoption = metrics.filter((m) => m.reported && (m.chart === "adoption" || m.chart === "nonzero"))
 		.sort((a, b) => b.share - a.share);
 
+	const headline = data.headline;
 	const small = [
-		card(t("versions"), t("versions_sub"), chartBox("versions", true)),
-		card(t("arch"), t("arch_sub"), chartBox("arch", true)),
+		...(single ? [] : [
+			card(t("versions"), t("versions_sub"), chartBox("versions", true)),
+			card(t("arch"), t("arch_sub"), chartBox("arch", true)),
+		]),
 		...charted.map((m, i) => card(m.label, t("reported_by", { n: fmt(m.reported) }), chartBox(`metric-${i}`, true))),
 	];
 
 	target.innerHTML = `
 		<div class="grid kpis">${kpis.join("")}</div>
-		${card(t("daily_title"), t("daily_sub"), chartBox("series"))}
-		${data.monthly.length >= 2 ? card(t("monthly_title"), t("monthly_sub"), chartBox("monthly")) : ""}
+		${headline
+			? card(t("headline_title", { label: headline.label }), t("headline_sub"), chartBox("series"))
+			: card(t("daily_title"), t("daily_sub"), chartBox("series"))}
+		${data.monthly.length >= 2 && !single ? card(t("monthly_title"), t("monthly_sub"), chartBox("monthly")) : ""}
 		${usage.map((u) => u.html).join("")}
 		<div class="grid two">${small.join("")}</div>
 		${adoption.length ? card(t("adoption"), t("adoption_sub"), `<div class="bars">${barRows(adoption.map((m) => ({
 			html: escapeHtml(m.label), title: `${m.description} · ${t("reported_by", { n: fmt(m.reported) })}`, share: m.share,
 		})), 1)}</div>`) : ""}`;
 
-	drawSeries(data.series);
-	if (data.monthly.length >= 2) drawMonthly(data.monthly);
-	drawDonut("versions", data.versions);
-	drawDonut("arch", data.arch);
+	if (headline) drawHeadline(headline);
+	else drawSeries(data.series);
+	if (data.monthly.length >= 2 && !single) drawMonthly(data.monthly);
+	if (!single) {
+		drawDonut("versions", data.versions);
+		drawDonut("arch", data.arch);
+	}
 	charted.forEach((metric, i) => {
 		const id = `metric-${i}`;
 		if (metric.chart === "donut") drawDonut(id, metric.data.filter((e) => e.count));
@@ -196,6 +230,9 @@ function header(project) {
 	document.getElementById("description").textContent = project.description;
 	const links = [`<a href="/">${escapeHtml(t("back"))}</a>`,
 		`<a href="/${encodeURIComponent(project.id)}/privacy">${escapeHtml(t("privacy"))}</a>`];
+	for (const link of project.links || []) {
+		links.push(`<a href="${escapeHtml(link.url)}" rel="noopener">${escapeHtml(link.label)}</a>`);
+	}
 	if (project.repo) links.push(`<a href="${escapeHtml(project.repo)}" rel="noopener">${escapeHtml(t("source"))}</a>`);
 	document.getElementById("links").innerHTML = links.join(" · ");
 }

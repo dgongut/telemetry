@@ -141,6 +141,19 @@ def _parse_usage(spec, where):
 	}
 
 
+def _parse_links(links, where):
+	"""Extra links for the page header, such as the bot itself on Telegram."""
+	links = links or []
+	_require(isinstance(links, list), where, "links is a list")
+	parsed = []
+	for index, link in enumerate(links):
+		_require(isinstance(link, dict) and link.get("label") and link.get("url"), where,
+				f"link {index} needs a label and a url")
+		_require(str(link["url"]).startswith("https://"), where, f"link {index} must be https://")
+		parsed.append({"label": link["label"], "url": str(link["url"])})
+	return parsed
+
+
 def parse(project_id, document):
 	"""Turns one YAML document into a manifest, or raises ManifestError."""
 	where = f"projects/{project_id}.yaml"
@@ -154,6 +167,15 @@ def parse(project_id, document):
 
 	metrics = document.get("metrics") or {}
 	_require(isinstance(metrics, dict), where, "metrics is a mapping")
+	parsed_metrics = [_parse_metric(key, spec, where) for key, spec in metrics.items()]
+
+	# The number the page leads with instead of active installations: for a
+	# project run as one instance, "1 active installation" says nothing.
+	headline = document.get("headline")
+	if headline is not None:
+		match = next((m for m in parsed_metrics if m["key"] == headline), None)
+		_require(match is not None and match["type"] in ("int", "number"), where,
+				"headline must be the key of a declared int or number metric")
 	return {
 		"id": project_id,
 		"name": document["name"],
@@ -164,7 +186,13 @@ def parse(project_id, document):
 		# Off means pings are answered, and told to stop, but not stored.
 		"enabled": bool(document.get("enabled", True)),
 		"interval_hours": interval,
-		"metrics": [_parse_metric(key, spec, where) for key, spec in metrics.items()],
+		# A single instance that many people use, run by its author: the page
+		# hides what only means something across installations (versions,
+		# architectures, "per installation") and shows usage as totals.
+		"single_instance": bool(document.get("single_instance", False)),
+		"headline": headline,
+		"links": _parse_links(document.get("links"), where),
+		"metrics": parsed_metrics,
 		"usage": _parse_usage(document.get("usage"), where),
 	}
 
