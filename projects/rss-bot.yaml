@@ -213,8 +213,8 @@ metrics:
     chart: none
     label: { es: Formato, datos del resumen, en: Format, summary data }
     description:
-      es: Cuántas suscripciones muestran datos sueltos de la descripción, del tipo «Tamaño. 4 GB». Solo el número, nunca qué datos.
-      en: How many subscriptions show loose data from the description, such as «Size. 4 GB». Only the number, never which data.
+      es: "Cuántas suscripciones muestran datos sueltos de la descripción, del tipo «Tamaño: 4 GB». Solo el número, nunca qué datos."
+      en: "How many subscriptions show loose data from the description, such as «Size: 4 GB». Only the number, never which data."
   messages_sent_total:
     type: int
     min: 0
