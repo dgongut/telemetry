@@ -181,6 +181,13 @@ metrics:
     description:
       es: Si el renombrado automático incluye los torrents añadidos fuera del bot.
       en: Whether automatic rename includes torrents added outside the bot.
+  auto_replace:
+    type: bool
+    chart: adoption
+    label: { es: Sustitución sin preguntar, en: Replace without asking }
+    description:
+      es: Si una descarga que termina sustituye sin preguntar al torrent que ya tenía su nombre.
+      en: Whether a finished download replaces, without asking, the torrent that already had its name.
   auto_move_series:
     type: bool
     chart: adoption
@@ -247,5 +254,6 @@ usage:
     auto_notify_error: { es: Aviso de error, en: Error notice }
     auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
     auto_rename: { es: Renombrado automático, en: Automatic rename }
+    auto_replace: { es: Sustitución automática, en: Automatic replace }
     auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
     auto_series_suggestion: { es: Carpeta de la serie sugerida, en: Series folder suggested }
