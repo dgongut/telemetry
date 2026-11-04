@@ -139,6 +139,13 @@ metrics:
     description:
       es: Si el aviso de torrents añadidos fuera del bot está activado.
       en: Whether the notice for torrents added outside the bot is on.
+  notify_ratio_reached:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de límite de ratio, en: Ratio limit notice }
+    description:
+      es: Si el aviso de torrents que dejan de compartir al llegar a su límite de ratio está activado y el gestor permite límites de ratio.
+      en: Whether the notice for torrents that stop seeding at their ratio limit is on and the manager supports ratio limits.
   auto_download:
     type: bool
     chart: adoption
@@ -253,6 +260,7 @@ usage:
     auto_notify_completed: { es: Aviso de descarga completada, en: Download completed notice }
     auto_notify_error: { es: Aviso de error, en: Error notice }
     auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
+    auto_notify_ratio: { es: Aviso de límite de ratio, en: Ratio limit notice }
     auto_rename: { es: Renombrado automático, en: Automatic rename }
     auto_replace: { es: Sustitución automática, en: Automatic replace }
     auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
