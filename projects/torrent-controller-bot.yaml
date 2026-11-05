@@ -235,11 +235,20 @@ metrics:
     description:
       es: Cuántas de las tres plantillas de renombrado (película, serie, temporada) se han cambiado. No su contenido.
       en: How many of the three rename templates (movie, series, season) were changed. Not their content.
+  tracker_limits:
+    type: int
+    min: 0
+    max: 1000
+    chart: nonzero
+    label: { es: Con límites por tracker, en: With limits per tracker }
+    description:
+      es: Cuántos trackers tienen límites propios de ratio o velocidad. Nunca cuáles.
+      en: How many trackers have ratio or speed limits of their own. Never which ones.
 
 usage:
   description:
-    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos, renombrados y carpetas de serie automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
-    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices, renames and series folders there were. Sent once a day, added up; never which torrent, directory or category it was about.
+    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos, renombrados, carpetas de serie y límites de tracker automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
+    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices, renames, series folders and tracker limits there were. Sent once a day, added up; never which torrent, directory or category it was about.
   groups:
     - prefix: cmd_
       display: "/{name}"
@@ -265,3 +274,4 @@ usage:
     auto_replace: { es: Sustitución automática, en: Automatic replace }
     auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
     auto_series_suggestion: { es: Carpeta de la serie sugerida, en: Series folder suggested }
+    auto_tracker_limits: { es: Límites de tracker aplicados, en: Tracker limits applied }
