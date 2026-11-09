@@ -149,17 +149,17 @@ metrics:
   auto_remove_ratio:
     type: bool
     chart: adoption
-    label: { es: Quitar al llegar al ratio, en: Remove at the ratio limit }
+    label: { es: Quitar al llegar al límite, en: Remove at the limit }
     description:
-      es: Si los torrents que llegan a su límite de ratio se quitan del gestor (sin borrar sus ficheros) y el gestor permite límites de ratio.
-      en: Whether torrents that reach their ratio limit are removed from the manager (keeping their files) and the manager supports ratio limits.
+      es: Si los torrents que dejan de compartir al llegar a su límite (de ratio o de tiempo) se quitan del gestor (sin borrar sus ficheros) y el gestor permite límites de ratio.
+      en: Whether torrents that stop seeding at their limit (ratio or time) are removed from the manager (keeping their files) and the manager supports ratio limits.
   notify_auto_removed:
     type: bool
     chart: adoption
-    label: { es: Aviso al quitar por ratio, en: Removed at ratio notice }
+    label: { es: Aviso al quitar por límite, en: Removed at limit notice }
     description:
-      es: Si se avisa de cada torrent quitado al llegar a su límite de ratio. Solo con esa opción activada.
-      en: Whether each torrent removed at its ratio limit is told. Only with that option on.
+      es: Si se avisa de cada torrent quitado al llegar a su límite. Solo con esa opción activada.
+      en: Whether each torrent removed at its limit is told. Only with that option on.
   auto_download:
     type: bool
     chart: adoption
@@ -284,7 +284,7 @@ usage:
     auto_notify_error: { es: Aviso de error, en: Error notice }
     auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
     auto_notify_ratio: { es: Aviso de límite de ratio, en: Ratio limit notice }
-    auto_remove_ratio: { es: Quitado al llegar al ratio, en: Removed at the ratio limit }
+    auto_remove_ratio: { es: Quitado al llegar a su límite, en: Removed at its limit }
     auto_rename: { es: Renombrado automático, en: Automatic rename }
     auto_replace: { es: Sustitución automática, en: Automatic replace }
     auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
