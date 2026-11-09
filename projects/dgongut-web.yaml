@@ -51,6 +51,8 @@ usage:
     cmd_help: help
     cmd_clear: clear
     cmd_lang: lang
+    cmd_lang_es: lang es
+    cmd_lang_en: lang en
     cmd_theme: theme
     cmd_sound: sound
     cmd_ls: ls
