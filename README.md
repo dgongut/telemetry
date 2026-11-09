@@ -46,6 +46,10 @@ opt_out: { es: Cómo se desactiva, en: How to turn it off }
 enabled: true          # a false: se responde "para" y no se guarda nada
 interval_hours: 24
 
+totals:                # opcional: contadores de usage sumados en el periodo, como cifras arriba del panel
+  - key: visit         # un contador, o un prefijo acabado en _ para sumar todo el grupo (cmd_)
+    label: { es: Visitas, en: Visits }
+
 metrics:
   hosts:
     type: int          # int, number, bool o enum
@@ -69,6 +73,8 @@ usage:
 ```
 
 Los textos pueden ser una cadena o un `{es:, en:}`. Todos los metrics llevan `description` obligatoria: es lo que aparece en `stats.dgongut.com/<id>/privacy`.
+
+Con `single_instance: true` y `totals`, el panel abre con esas cifras y con la primera día a día, en vez de con instalaciones activas. Es lo que usa [projects/dgongut-web.yaml](projects/dgongut-web.yaml): todas las visitas de la web envían con el mismo `install_id` (como `text/plain` con `sendBeacon`, para no necesitar CORS) y no se guarda nada en el navegador.
 
 Las claves de `usage` no se declaran una a una, solo se validan por forma. Si hubiera que declararlas, cada botón nuevo de un proyecto se perdería en silencio hasta que alguien se acordara de añadirlo. Como son identificadores del código y nunca texto del usuario, basta con un patrón y un máximo de claves.
 

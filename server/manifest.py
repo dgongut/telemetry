@@ -18,6 +18,8 @@ import yaml
 # Identifiers that end up in URLs and in the database.
 PROJECT_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 METRIC_KEY = re.compile(r"^[a-z][a-z0-9_]{0,47}$")
+# The same shape validate.py accepts for usage keys.
+USAGE_KEY = re.compile(r"^[a-z][a-zA-Z0-9_]{0,63}$")
 
 METRIC_TYPES = ("int", "number", "bool", "enum")
 # Which charts each type can be drawn as.
@@ -154,6 +156,26 @@ def _parse_links(links, where):
 	return parsed
 
 
+def _parse_totals(totals, where):
+	"""
+	Usage counters added up over the period, shown as figures at the top of the
+	page: a single instance reads better as "12.345 visits" than as one bar.
+
+	A key ending in "_" adds up a whole group (every cmd_ counter); any other
+	key is one counter.
+	"""
+	totals = totals or []
+	_require(isinstance(totals, list), where, "totals is a list")
+	parsed = []
+	for index, total in enumerate(totals):
+		_require(isinstance(total, dict) and total.get("key") and total.get("label"), where,
+				f"total {index} needs a key and a label")
+		key = str(total["key"])
+		_require(USAGE_KEY.match(key), where, f"total {index}: {key!r} is not a usage key or prefix")
+		parsed.append({"key": key, "label": total["label"]})
+	return parsed
+
+
 def parse(project_id, document):
 	"""Turns one YAML document into a manifest, or raises ManifestError."""
 	where = f"projects/{project_id}.yaml"
@@ -192,6 +214,7 @@ def parse(project_id, document):
 		"single_instance": bool(document.get("single_instance", False)),
 		"headline": headline,
 		"links": _parse_links(document.get("links"), where),
+		"totals": _parse_totals(document.get("totals"), where),
 		"metrics": parsed_metrics,
 		"usage": _parse_usage(document.get("usage"), where),
 	}

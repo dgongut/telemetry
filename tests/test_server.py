@@ -371,7 +371,50 @@ def test_a_single_instance_leads_with_its_headline_and_its_links(tmp_path):
 	assert card["sparkline"][-3:] == [40, 0, 55]
 
 
+def test_a_ping_sent_as_text_plain_is_read_as_json(client):
+	"""A browser sends with sendBeacon as text/plain, to skip the CORS preflight."""
+	response = client.post("/v1/ping", content=json.dumps(ping()), headers={"Content-Type": "text/plain"})
+	assert response.status_code == 200
+
+
+def test_totals_add_up_counters_and_groups_over_the_period(tmp_path):
+	"""
+	A web page: every visit shares one install_id, so its figures are totals,
+	and a counter shown as a total is not repeated as a bar.
+	"""
+	projects = tmp_path / "projects"
+	projects.mkdir()
+	(projects / "web.yaml").write_text(yaml.safe_dump({
+		"name": "Web", "single_instance": True,
+		"totals": [{"key": "visit", "label": {"es": "Visitas", "en": "Visits"}}, {"key": "cmd_", "label": "Commands"}],
+		"usage": {"description": "counters", "groups": [{"prefix": "cmd_", "label": "Commands"}]},
+	}))
+	manifests = manifest.load_all(str(projects))
+	database = db_module.Database(str(tmp_path / "t.db"))
+	install = str(uuid.uuid4())
+	july = 1_783_000_000     # 2026-07-02
+	sent = ((-8, {"visit": 4, "cmd_help": 1}),            # the previous 7-day period
+			(0, {"visit": 2, "cmd_help": 3}), (0, {"visit": 1, "cmd_ls": 2}),
+			(2, {"visit": 5, "cmd_secret": 1}))
+	for day, usage in sent:
+		database.record({"project": "web", "install_id": install, "version": "1", "arch": None,
+						"metrics": {}, "usage": usage}, now=july + day * 86400)
+
+	data = summary.project(database, manifests["web"], 7, lang="es", now=july + 2 * 86400 + 60)
+	visits, commands = data["totals"]
+	assert (visits["label"], visits["value"], visits["previous"]) == ("Visitas", 8, 4)
+	assert (commands["value"], commands["previous"]) == (6, 1)
+	# Day by day up to yesterday: today's 5 visits are still arriving.
+	assert visits["days"][-1] == "2026-07-03" and visits["values"][-3:] == [0, 3, 0]
+	assert [group["label"] for group in data["usage"]] == ["Commands"]
+
+	card = summary.overview(database, manifests, lang="es", now=july + 2 * 86400 + 60)[0]
+	assert card["totals"] == [{"label": "Visitas", "value": 12}, {"label": "Commands", "value": 7}]
+
+
 @pytest.mark.parametrize("change", [
+	{"totals": [{"key": "Visit", "label": "x"}]},
+	{"totals": [{"key": "visit"}]},
 	{"headline": "nope"},
 	{"links": [{"label": "x", "url": "http://insecure"}]},
 	{"links": [{"url": "https://t.me/x"}]},

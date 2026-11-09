@@ -150,17 +150,20 @@ function render(data) {
 	const metrics = data.metrics;
 	const single = data.project.single_instance;
 
+	const totals = data.totals || [];
 	const kpis = single ? [] : [
 		kpi(t("active"), fmt(k.active), delta(k.active, k.active_previous)),
 		kpi(t("new"), fmt(k.new), delta(k.new, k.new_previous)),
 	];
+	for (const total of totals) kpis.push(kpi(total.label, fmt(total.value), delta(total.value, total.previous)));
 	for (const metric of metrics) {
 		if (!metric.kpi) continue;
 		const extra = metric.kpi.kind === "sum" && !single
 			? `<span class="delta">${escapeHtml(t("per_install", { n: fmt1(metric.kpi.mean) }))}</span>` : "";
 		kpis.push(kpi(metric.kpi_label, metric.kpi.kind === "sum" ? fmt(metric.kpi.value) : fmt1(metric.kpi.value), extra));
 	}
-	if (k.latest_version) {
+	// A web page has no version anyone runs: with totals to show, it says nothing.
+	if (k.latest_version && !(single && totals.length)) {
 		kpis.push(single
 			? kpi(t("version"), escapeHtml(k.latest_version))
 			: kpi(t("latest"), escapeHtml(pct(k.latest_version_share)),
@@ -177,7 +180,10 @@ function render(data) {
 	const adoption = metrics.filter((m) => m.reported && (m.chart === "adoption" || m.chart === "nonzero"))
 		.sort((a, b) => b.share - a.share);
 
-	const headline = data.headline;
+	// A single instance has nothing to say with "active installations per day":
+	// it leads with its headline metric, or else with its first total.
+	const headline = data.headline || (single && totals.length
+		? { label: totals[0].label, days: totals[0].days, values: totals[0].values, sub: t("totals_sub") } : null);
 	const small = [
 		...(single ? [] : [
 			card(t("versions"), t("versions_sub"), chartBox("versions", true)),
@@ -189,7 +195,7 @@ function render(data) {
 	target.innerHTML = `
 		<div class="grid kpis">${kpis.join("")}</div>
 		${headline
-			? card(t("headline_title", { label: headline.label }), t("headline_sub"), chartBox("series"))
+			? card(t("headline_title", { label: headline.label }), headline.sub || t("headline_sub"), chartBox("series"))
 			: card(t("daily_title"), t("daily_sub"), chartBox("series"))}
 		${data.monthly.length >= 2 && !single ? card(t("monthly_title"), t("monthly_sub"), chartBox("monthly")) : ""}
 		${usage.map((u) => u.html).join("")}

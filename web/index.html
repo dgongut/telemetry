@@ -39,6 +39,8 @@
 				<p class="sub" style="margin:0">${escapeHtml(card.description)}</p>
 				<div class="numbers">${card.headline
 					? `<div><b>${card.headline.latest === null ? "–" : fmt(card.headline.latest)}</b><span>${escapeHtml(card.headline.label)}</span></div>`
+					: card.totals
+					? card.totals.map((total) => `<div><b>${fmt(total.value)}</b><span>${escapeHtml(t("last_30", { label: total.label.toLowerCase() }))}</span></div>`).join("")
 					: `<div><b>${fmt(card.active_30)}</b><span>${escapeHtml(t("active_30"))}</span></div>
 					<div><b>${fmt(card.active_7)}</b><span>${escapeHtml(t("active_7"))}</span></div>`}
 				</div>

@@ -1,0 +1,72 @@
+# dgongut-web
+#
+# My website, www.dgongut.com: a terminal people type commands into. Every
+# browser sends with the same install_id and nothing is stored on the visitor's
+# side, so this is one instance whose counters add up every visit of the day.
+
+name: dgongut.com
+description:
+  es: Mi web personal, una terminal en la que se escriben comandos.
+  en: My personal website, a terminal you type commands into.
+repo: https://github.com/dgongut/dgongut-web
+links:
+  - label: www.dgongut.com
+    url: https://www.dgongut.com
+opt_out:
+  es: No hay nada que desactivar. La web no guarda nada en tu navegador y todas las visitas se envían con el mismo identificador, así que ninguna se puede distinguir de las demás.
+  en: There is nothing to turn off. The site stores nothing in your browser and every visit is sent with the same identifier, so no visit can be told apart from the others.
+enabled: true
+interval_hours: 24
+single_instance: true
+
+totals:
+  - key: visit
+    label: { es: Visitas, en: Visits }
+  - key: cmd_
+    label: { es: Comandos ejecutados, en: Commands run }
+
+usage:
+  description:
+    es: Una visita por cada vez que se carga la página, en qué idioma, y cuántas veces se ejecutó cada comando. Se suma todo por día; nunca lo que escribes.
+    en: One visit each time the page loads, in which language, and how many times each command was run. Everything is added up per day; never what you type.
+  groups:
+    - prefix: cmd_
+      label: { es: Comandos, en: Commands }
+      description: { es: Los comandos ocultos cuentan juntos para no destaparlos., en: The hidden commands count together so as not to give them away. }
+    - prefix: cat_
+      label: { es: Proyectos consultados, en: Projects looked at }
+    - prefix: lang_
+      label: { es: Idioma de la visita, en: Language of the visit }
+  labels:
+    cmd_whoami: whoami
+    cmd_ls_projects: ls /Projects
+    cmd_ls_social: ls /Social
+    cmd_cat_skills: cat skills.txt
+    cmd_neofetch: neofetch
+    cmd_git_log: git log
+    cmd_docker_images: docker images
+    cmd_contact: contact
+    cmd_donate: donate
+    cmd_donors: donors
+    cmd_help: help
+    cmd_clear: clear
+    cmd_lang: lang
+    cmd_theme: theme
+    cmd_sound: sound
+    cmd_ls: ls
+    cmd_pwd: pwd
+    cmd_date: date
+    cmd_matrix: matrix
+    cmd_exit: exit
+    cmd_secret: { es: Secretos 🤫, en: Secrets 🤫 }
+    cmd_unknown: { es: Comando no encontrado, en: Command not found }
+    cat_docker_controller_bot: docker-controller-bot
+    cat_malaga_cam_bot: malaga-cam-bot
+    cat_torrent_controller_bot: torrent-controller-bot
+    cat_dropbot: dropbot
+    cat_wakebot: wakebot
+    cat_intrubot: intrubot
+    cat_whitelist_telegram_bot: whitelist-telegram-bot
+    cat_borgmatic_script: borgmatic-script
+    lang_es: { es: Español, en: Spanish }
+    lang_en: { es: Inglés, en: English }

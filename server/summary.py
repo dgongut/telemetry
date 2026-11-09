@@ -110,6 +110,45 @@ def _headline_series(db, manifest, first_day, last_day, lang):
 			"days": days, "values": values, "latest": latest}
 
 
+def _totals(db, manifest, first_day, last_day, previous_first, lang):
+	"""
+	Each of the manifest's totals over the period and the one before, and day
+	by day up to yesterday: today is still arriving, and would read as a drop.
+	"""
+	if not manifest.get("totals"):
+		return []
+	rows = db.query(
+		"""SELECT daily.day AS day, usage.key AS key, SUM(usage.value) AS total
+		FROM daily, json_each(daily.usage) AS usage
+		WHERE daily.project = ? AND daily.day BETWEEN ? AND ?
+		GROUP BY daily.day, usage.key""",
+		(manifest["id"], previous_first, last_day))
+
+	result = []
+	for total in manifest["totals"]:
+		key = total["key"]
+		matches = (lambda k: k.startswith(key)) if key.endswith("_") else (lambda k: k == key)
+		by_day = {}
+		for row in rows:
+			if matches(row["key"]):
+				by_day[row["day"]] = by_day.get(row["day"], 0) + row["total"]
+		days, values = [], []
+		day = day_offset(first_day, -1)
+		while day < last_day:
+			days.append(day)
+			values.append(by_day.get(day, 0))
+			day = day_offset(day, 1)
+		result.append({
+			"key": key,
+			"label": text(total["label"], lang),
+			"value": sum(value for day, value in by_day.items() if day >= first_day),
+			"previous": sum(value for day, value in by_day.items() if day < first_day),
+			"days": days,
+			"values": values,
+		})
+	return result
+
+
 def _project_header(manifest, lang):
 	return {"id": manifest["id"], "name": manifest["name"],
 			"description": text(manifest["description"], lang), "repo": manifest["repo"],
@@ -168,8 +207,12 @@ def _usage_summary(db, manifest, first_day, last_day, active, lang):
 			for group in spec["groups"]]
 	other = {"prefix": "", "label": "Other", "description": "", "display": "{name}", "items": []}
 
+	# A counter that is a total on its own is already a figure at the top.
+	shown_as_total = {total["key"] for total in manifest.get("totals", []) if not total["key"].endswith("_")}
 	for row in rows:
 		key = row["key"]
+		if key in shown_as_total:
+			continue
 		group = next((candidate for candidate in groups if key.startswith(candidate["prefix"])), other)
 		name = key[len(group["prefix"]):]
 		label = text(spec["labels"].get(key), lang) or group["display"].replace("{name}", name)
@@ -240,6 +283,7 @@ def project(db, manifest, days, lang="en", now=None):
 		# Up to today: unlike installations, a headline value is a snapshot
 		# that does not grow as the day goes on.
 		"headline": _headline_series(db, manifest, first_day, last_day, lang),
+		"totals": _totals(db, manifest, first_day, last_day, previous_first, lang),
 		# Every complete month, however old: this is the part that is kept.
 		"monthly": rollup.history(db, project_id),
 		"versions": shown_versions,
@@ -266,7 +310,13 @@ def overview(db, manifests, lang="en", now=None):
 		if headline:
 			card["headline"] = {"label": headline["label"], "latest": headline["latest"]}
 			card["sparkline"] = [value or 0 for value in headline["values"]]
+		totals = _totals(db, manifest, first_day, last_day, first_day, lang)
+		if totals and not headline:
+			card["totals"] = [{"label": total["label"], "value": total["value"]} for total in totals[:2]]
+			card["sparkline"] = totals[0]["values"]
 		cards.append(card)
 	# A single instance would always sit last behind projects with many installs.
+	# Totals are left out: a thousand page views are not a thousand users, and
+	# would push a web page above the projects people actually run.
 	cards.sort(key=lambda card: -max(card["active_30"], (card.get("headline") or {}).get("latest") or 0))
 	return cards
