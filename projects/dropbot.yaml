@@ -74,7 +74,7 @@ metrics:
     value_labels:
       ask: { es: Preguntar, en: Ask }
       send: { es: Enviar y guardar, en: Send and keep }
-      send_delete: { es: Enviar y borrar, en: Send and delete }
+      send_delete: { es: Enviar y eliminar, en: Send and delete }
       store: { es: Solo guardar, en: Keep only }
     chart: donut
     label: { es: Tras descargar un enlace, en: After downloading a link }
@@ -184,7 +184,7 @@ metrics:
     values: [ask, delete, keep]
     value_labels:
       ask: { es: Preguntar, en: Ask }
-      delete: { es: Borrar el comprimido, en: Delete the compressed file }
+      delete: { es: Eliminar el comprimido, en: Delete the compressed file }
       keep: { es: Conservar el comprimido, en: Keep the compressed file }
     chart: donut
     label: { es: Tras descomprimir, en: After extracting }
@@ -274,6 +274,78 @@ metrics:
     description:
       es: Si lo descargado como audio desde un enlace va aparte (/url_audio, o /audio si no está montada). Nunca la ruta.
       en: Whether audio downloaded from links goes somewhere else (/url_audio, or /audio when that is not mounted). Never the path.
+  chosen_folders:
+    type: int
+    min: 0
+    max: 20
+    chart: histogram
+    buckets: ["0", "1", "2-3", "4+"]
+    label: { es: Carpetas elegidas en /settings, en: Folders chosen in /settings }
+    description:
+      es: Cuántos tipos de fichero tienen una carpeta elegida en /settings en vez de la que les toca por los volúmenes. Nunca las rutas.
+      en: How many kinds of file have a folder chosen in /settings instead of the one the volumes give them. Never the paths.
+  favorite_folders:
+    type: int
+    min: 0
+    max: 1000
+    chart: histogram
+    buckets: ["0", "1", "2-3", "4-9", "10+"]
+    label: { es: Carpetas favoritas, en: Favourite folders }
+    description:
+      es: Cuántas carpetas favoritas hay en /settings. Nunca las rutas.
+      en: How many favourite folders /settings holds. Never the paths.
+  ask_folder:
+    type: bool
+    chart: adoption
+    label: { es: Preguntar la carpeta de cada descarga, en: Ask the folder of each download }
+    description:
+      es: Si al terminar cada descarga se pregunta en qué carpeta guardarla.
+      en: Whether the bot asks where to keep each download when it finishes.
+  low_space_warning:
+    type: bool
+    chart: adoption
+    label: { es: Aviso de poco espacio, en: Low space warning }
+    description:
+      es: Si se avisa cuando lo que llega puede no caber en el disco.
+      en: Whether a warning is shown when what arrives may not fit on the disk.
+  auto_rename:
+    type: bool
+    chart: adoption
+    label: { es: Renombrado automático, en: Automatic renaming }
+    description:
+      es: Si los vídeos se renombran solos al descargarse. Nunca los nombres.
+      en: Whether videos are renamed on their own when downloaded. Never the names.
+  auto_replace:
+    type: bool
+    chart: adoption
+    label: { es: Sustituir sin preguntar, en: Replace without asking }
+    description:
+      es: Si, con el renombrado automático, un fichero que ya tiene ese nombre se sustituye sin preguntar.
+      en: Whether, with automatic renaming, a file that already has that name is replaced without asking.
+  custom_templates:
+    type: int
+    min: 0
+    max: 3
+    chart: histogram
+    buckets: ["0", "1", "2", "3"]
+    label: { es: Plantillas de renombrado cambiadas, en: Renaming templates changed }
+    description:
+      es: Cuántas de las tres plantillas de renombrado se han cambiado. Nunca su contenido.
+      en: How many of the three renaming templates were changed. Never what they say.
+  series_suggest:
+    type: bool
+    chart: adoption
+    label: { es: Proponer la carpeta de la serie, en: Suggest the series folder }
+    description:
+      es: Si al llegar un episodio se propone moverlo a la carpeta donde están los demás. Nunca la serie ni la carpeta.
+      en: Whether an arriving episode is offered a move to the folder that holds the others. Never the series or the folder.
+  series_direct:
+    type: bool
+    chart: adoption
+    label: { es: Directo a la carpeta de la serie, en: Straight to the series folder }
+    description:
+      es: Si un episodio se manda sin preguntar a la carpeta de su serie cuando no hay duda.
+      en: Whether an episode is sent to its series folder without asking when there is no doubt.
 
 usage:
   description:
