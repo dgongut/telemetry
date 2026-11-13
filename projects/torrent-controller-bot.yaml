@@ -212,7 +212,7 @@ metrics:
   auto_move_series:
     type: bool
     chart: adoption
-    label: { es: Series directas a su carpeta, en: Series straight to their folder }
+    label: { es: Episodios a la carpeta de su serie, en: Episodes to their series folder }
     description:
       es: Si la descarga automática añade los episodios directamente en la carpeta de su serie cuando no hay dudas.
       en: Whether automatic download adds episodes straight into the folder of their series when there is no doubt.
@@ -223,6 +223,13 @@ metrics:
     description:
       es: Si los episodios añadidos fuera del bot también se mueven a la carpeta de su serie.
       en: Whether episodes added outside the bot are also moved to the folder of their series.
+  new_series_dir:
+    type: bool
+    chart: adoption
+    label: { es: Carpeta de series nuevas, en: Folder for new series }
+    description:
+      es: Si hay una carpeta elegida para las series nuevas (una serie sin episodios en el gestor va a una carpeta con su nombre dentro de ella). Solo con los episodios a la carpeta de su serie activado. Nunca la carpeta.
+      en: Whether a folder for new series is chosen (a series with no episodes in the manager goes to a folder named after it inside it). Only with episodes to their series folder on. Never the folder.
   low_space_warning:
     type: bool
     chart: adoption
@@ -268,8 +275,8 @@ metrics:
 
 usage:
   description:
-    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot y cuántos avisos, renombrados, carpetas de serie, límites de tracker y movimientos del mover automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
-    en: How many times a day each command and button was used, how torrents reached the bot and how many automatic notices, renames, series folders, tracker limits and moves of the automatic mover there were. Sent once a day, added up; never which torrent, directory or category it was about.
+    es: Cuántas veces al día se usó cada comando y cada botón, cómo llegaron los torrents al bot, cuántos se pusieron en espera porque el gestor no respondía y cuántos avisos, renombrados, carpetas de serie, límites de tracker y movimientos del mover automáticos hubo. Se envía una vez al día, sumado; nunca sobre qué torrent, directorio o categoría.
+    en: How many times a day each command and button was used, how torrents reached the bot, how many were put on hold because the manager did not answer and how many automatic notices, renames, series folders, tracker limits and moves of the automatic mover there were. Sent once a day, added up; never which torrent, directory or category it was about.
   groups:
     - prefix: cmd_
       display: "/{name}"
@@ -287,6 +294,10 @@ usage:
     add_file: { es: Fichero .torrent, en: .torrent file }
     add_magnet: { es: Enlace magnet, en: Magnet link }
     add_url: { es: URL de un .torrent, en: URL to a .torrent }
+    add_queued: { es: En espera porque el gestor no respondía, en: On hold because the manager did not answer }
+    add_queue_done: { es: Espera resuelta (añadido o rechazado), en: Hold resolved (added or refused) }
+    add_queue_gave_up: { es: Abandonado tras esperar 24 h, en: Given up after waiting 24 h }
+    late_add: { es: Añadido que el gestor aceptó tras dar error, en: Add the manager took after an error }
     auto_notify_completed: { es: Aviso de descarga completada, en: Download completed notice }
     auto_notify_error: { es: Aviso de error, en: Error notice }
     auto_notify_external: { es: Aviso de añadido externamente, en: Externally added notice }
@@ -294,7 +305,8 @@ usage:
     auto_remove_ratio: { es: Quitado al llegar a su límite, en: Removed at its limit }
     auto_rename: { es: Renombrado automático, en: Automatic rename }
     auto_replace: { es: Sustitución automática, en: Automatic replace }
-    auto_move_series: { es: Serie directa a su carpeta, en: Series straight to its folder }
+    auto_move_series: { es: Episodio a la carpeta de su serie, en: Episode to its series folder }
+    auto_new_series: { es: Serie nueva a su propia carpeta, en: New series to a folder of its own }
     auto_mover: { es: Movimiento del mover automático, en: Move by the automatic mover }
     auto_series_suggestion: { es: Carpeta de la serie sugerida, en: Series folder suggested }
     auto_tracker_limits: { es: Límites de tracker aplicados, en: Tracker limits applied }
